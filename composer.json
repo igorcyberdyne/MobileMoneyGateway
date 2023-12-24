@@ -1,0 +1,39 @@
+{
+  "name": "ekolotech/mobilemoney-gateway",
+  "description": "Provides a set of classes that can be used to call APIs and web interfaces for mobile money payments in Africa",
+  "type": "library",
+  "homepage": "https://github.com/igorcyberdyne/MobileMoneyGateway",
+  "keywords": [
+    "php",
+    "mobile",
+    "money",
+    "mtn"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "EKOLOTECH",
+      "email": "contact@kolotech.fr",
+      "homepage": "https://ekolotech.fr"
+    },
+    {
+      "name": "Igor GAMATH",
+      "email": "igorcyberdyne@gmail.com",
+      "homepage": "https://www.linkedin.com/in/igor-gamath-11b10314a",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ekolotech\\MobileMoney\\Gateway\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Ekolotech\\MobileMoney\\Gateway\\": "tests/"
+    }
+  }
+}
