@@ -2,7 +2,9 @@
 
 namespace Ekolotech\MobileMoney\Gateway\Api\Helper;
 
-class AbstractTools
+use Ramsey\Uuid\Uuid;
+
+abstract class AbstractTools
 {
     public static function slugify($text, string $divider = '-'): ?string
     {
@@ -43,6 +45,11 @@ class AbstractTools
         }
 
         return $string;
+    }
+
+    public static function uuid(): string
+    {
+        return Uuid::uuid4();
     }
 
 }
