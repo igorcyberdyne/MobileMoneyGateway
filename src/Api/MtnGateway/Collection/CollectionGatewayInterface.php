@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Interface;
+namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection;
 
 use Ekolotech\MobileMoney\Gateway\Api\Dto\CollectRequestBody;
 

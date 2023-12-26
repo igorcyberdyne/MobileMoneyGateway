@@ -64,6 +64,22 @@ final class ExceptionMessage extends AbstractArrayKeyValue
                 "key" => CollectionException::REQUEST_TO_PAY_BAD_NUMBER,
                 "value" => "Bad number given",
             ],
+            [
+                "key" => DisbursementException::DISBURSE_NOT_PERFORM,
+                "value" => "Error when launching disbursement",
+            ],
+            [
+                "key" => DisbursementException::DISBURSE_EMPTY_PAYMENT_PARAM,
+                "value" => "The params [param] cannot be empty",
+            ],
+            [
+                "key" => DisbursementException::DISBURSE_AMOUNT_CANNOT_BE_MINUS_ZERO,
+                "value" => "The amount must be strictly greater than 0",
+            ],
+            [
+                "key" => DisbursementException::DISBURSE_BAD_NUMBER,
+                "value" => "Bad number given",
+            ],
         ];
     }
 }

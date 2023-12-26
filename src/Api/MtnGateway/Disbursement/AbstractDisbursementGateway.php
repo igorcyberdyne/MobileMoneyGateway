@@ -1,9 +1,9 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection;
+namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
 
-use Ekolotech\MobileMoney\Gateway\Api\Dto\CollectRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\CollectionException;
+use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MobileMoney\Gateway\Api\Exception\DisbursementException;
 use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
 use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
 use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\AbstractMtnApiGateway;
@@ -15,36 +15,36 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implements CollectionGatewayInterface
+abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway implements DisbursementGatewayInterface
 {
-    protected function getCollectionUrl(): string
+    protected function getDisbursementUrl(): string
     {
-        return $this->getBaseApiUrl() . "/collection";
+        return $this->getBaseApiUrl() . "/disbursement";
     }
 
     protected function getTokenUrl(): string
     {
-        return $this->getCollectionUrl() . "/token/";
+        return $this->getDisbursementUrl() . "/token/";
     }
 
     protected function getTransactionReferenceUrl(): string
     {
-        return $this->getCollectionUrl() . "/v1_0/requesttopay/{referenceId}";
+        return $this->getDisbursementUrl() . "/v1_0/transfer/{referenceId}";
     }
 
     protected function getAccountHolderUrl(): string
     {
-        return $this->getCollectionUrl() . "/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/active";
+        return $this->getDisbursementUrl() . "/v1_0/accountholder/{accountHolderIdType}/{accountHolderId}/active";
     }
 
     protected function getAccountHolderBasicInfoUrl(): string
     {
-        return $this->getCollectionUrl() . "/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo";
+        return $this->getDisbursementUrl() . "/v1_0/accountholder/msisdn/{accountHolderMSISDN}/basicuserinfo";
     }
 
     protected function getAccountBalanceUrl(): string
     {
-        return $this->getCollectionUrl() . "/v1_0/account/balance";
+        return $this->getDisbursementUrl() . "/v1_0/account/balance";
     }
 
 
@@ -55,7 +55,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été débité d'un montant[[amount]]", $params);
+        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été crédité d'un montant[[amount]]", $params);
     }
 
 
@@ -66,22 +66,21 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été débité de[[amount]]", $params);
+        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été crédité de[[amount]]", $params);
     }
 
 
     /**
-     * @throws CollectionException
      * @throws Exception
      */
-    public function collect(CollectRequestBody $collectRequestBody): bool
+    public function disburse(DisburseRequestBody $disburseRequestBody): bool
     {
-        $collectBody = $this->validateCollectRequestBody($collectRequestBody);
+        $disburseBody = $this->validateDisburseRequestBody($disburseRequestBody);
 
         $headers = [
             'Authorization' => $this->buildBearerToken(),
             'X-Callback-Url' => $this->getProviderCallbackUrl(),
-            'X-Reference-Id' => $collectRequestBody->reference,
+            'X-Reference-Id' => $disburseRequestBody->reference,
             'X-Target-Environment' => $this->currentApiEnvName(),
             'Content-Type' => 'application/json',
             'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
@@ -92,8 +91,8 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
         }
 
         try {
-            $client = HttpClient::create(["headers" => $headers, "body" =>  json_encode($collectBody)]);
-            $response = $client->request(RequestMethod::POST, $this->getCollectionUrl() . "/v1_0/requesttopay");
+            $client = HttpClient::create(["headers" => $headers, "body" =>  json_encode($disburseBody)]);
+            $response = $client->request(RequestMethod::POST, $this->getDisbursementUrl() . "/v1_0/transfer");
 
             if ($response->getStatusCode() != self::STATUS_ACCEPTED) {
                 $response->toArray();
@@ -104,33 +103,34 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
             return true;
         }
         catch (Exception|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $e);
+            var_dump($e->getMessage());
+            throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $e);
         }
     }
 
 
     /**
-     * @param CollectRequestBody $collectRequestBody
+     * @param DisburseRequestBody $disburseRequestBody
      * @return array
-     * @throws CollectionException
+     * @throws DisbursementException
      */
-    private function validateCollectRequestBody(CollectRequestBody $collectRequestBody): array
+    private function validateDisburseRequestBody(DisburseRequestBody $disburseRequestBody): array
     {
-        if (0 >= $collectRequestBody->amount) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_AMOUNT_CANNOT_BE_MINUS_ZERO);
+        if (0 >= $disburseRequestBody->amount) {
+            throw DisbursementException::load(DisbursementException::DISBURSE_AMOUNT_CANNOT_BE_MINUS_ZERO);
         }
 
-        if (1 !== preg_match('/^[0-9]+$/', $collectRequestBody->number)) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_NUMBER);
+        if (1 !== preg_match('/^[0-9]+$/', $disburseRequestBody->number)) {
+            throw DisbursementException::load(DisbursementException::DISBURSE_BAD_NUMBER);
         }
 
         return [
-            "amount" => $collectRequestBody->amount,
+            "amount" => $disburseRequestBody->amount,
             "currency" => $this->getCurrency(),
-            "externalId" => $collectRequestBody->reference,
-            "payer" => [
+            "externalId" => $disburseRequestBody->reference,
+            "payee" => [
                 "partyIdType" => self::MSISDN_ACCOUNT_TYPE,
-                "partyId" => $collectRequestBody->number
+                "partyId" => $disburseRequestBody->number
             ],
             "payerMessage" => $this->getPayerMessage(),
             "payeeNote" => $this->getPayeeNote(),
@@ -140,7 +140,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
     /**
      * @throws Exception
      */
-    public function collectReference(string $reference): array
+    public function disburseReference(string $reference): array
     {
         return $this->transactionReference($reference);
     }
