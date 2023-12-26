@@ -21,7 +21,7 @@ interface MtnApiGatewayInterface extends ApiGatewayInterface
      */
     public function createAccess(): array;
 
-    public function accountHolderActive(string $phoneNumber): array;
+    public function accountHolderActive(string $phoneNumber): bool;
 
     public function accountHolderBasicUserInfo(string $phoneNumber): array;
 

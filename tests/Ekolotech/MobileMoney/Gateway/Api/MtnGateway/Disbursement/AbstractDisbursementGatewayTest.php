@@ -229,6 +229,8 @@ class AbstractDisbursementGatewayTest extends TestCase
         );
 
         $this->assertTrue($this->disbursementGateway->disburse($disburseRequest));
+
+        return $disburseRequest->reference;
     }
 
     /**
@@ -276,6 +278,89 @@ class AbstractDisbursementGatewayTest extends TestCase
 
         $this->expectExceptionCode(DisbursementException::DISBURSE_BAD_NUMBER);
         $this->disbursementGateway->disburse($disburseRequest);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_disburse_reference()
+    {
+        $reference = $this->test_disburse_THEN_success();
+        $disburseReference = $this->disbursementGateway->disburseReference($reference);
+
+        $this->assertIsArray($disburseReference);
+        foreach ([
+            "amount",
+            "currency",
+            "externalId",
+            "payee",
+            "payerMessage",
+            "payeeNote",
+            "status",
+            "reason",
+                     ] as $key) {
+            $this->assertArrayHasKey($key, $disburseReference);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_balance()
+    {
+        $balance = $this->createToken()->disbursementGateway->balance();
+
+        $this->assertArrayHasKey("availableBalance", $balance);
+        $this->assertArrayHasKey("currency", $balance);
+        $this->assertEquals($this->disbursementGateway->getCurrency(), $balance["currency"]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_accountHolderActive()
+    {
+        $this->assertTrue(
+            $this
+                ->createToken()
+                ->disbursementGateway
+                ->accountHolderActive("066304925")
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_accountHolderBasicUserInfo()
+    {
+        $accountInfo = $this
+            ->createToken()
+            ->disbursementGateway
+            ->accountHolderBasicUserInfo("46733123452")
+        ;
+
+        $this->assertIsArray($accountInfo);
+        foreach ([
+             "name",
+             "given_name",
+             "family_name",
+             "birthdate",
+             "locale",
+             "gender",
+                     ] as $key) {
+            $this->assertArrayHasKey($key, $accountInfo);
+        }
+
+        $accountInfo = [
+            "given_name" => $accountInfo["given_name"] ?? null,
+            "family_name" => $accountInfo["family_name"] ?? null,
+            "name" => $accountInfo["name"] ?? null,
+        ];
+        $this->assertEquals([
+            "given_name" => "Sand",
+            "family_name" => "Box",
+            "name" => "Sand Box",
+        ], $accountInfo);
     }
 
 }

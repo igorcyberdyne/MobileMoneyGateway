@@ -50,23 +50,26 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
 
     public function getPayerMessage(): string
     {
-        $args = func_get_args();
+        $args = func_get_args()[0] ?? [];
 
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été crédité d'un montant[[amount]]", $params);
+        return AbstractTools::injectVariables(
+            "Décaissement d'un montant de [[amount]] {$this->getCurrency()} au bénéfice du numéro [[number]]",
+            $params
+        );
     }
 
 
     public function getPayeeNote(): string
     {
-        $args = func_get_args();
+        $args = func_get_args()[0] ?? [];
 
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été crédité de[[amount]]", $params);
+        return AbstractTools::injectVariables("Le compte au numéro [[number]] a été crédité de [[amount]] {$this->getCurrency()}", $params);
     }
 
 
@@ -103,7 +106,6 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
             return true;
         }
         catch (Exception|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
-            var_dump($e->getMessage());
             throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $e);
         }
     }
@@ -132,8 +134,8 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
                 "partyIdType" => self::MSISDN_ACCOUNT_TYPE,
                 "partyId" => $disburseRequestBody->number
             ],
-            "payerMessage" => $this->getPayerMessage(),
-            "payeeNote" => $this->getPayeeNote(),
+            "payerMessage" => $this->getPayerMessage(["amount" => $disburseRequestBody->amount, "number" => $disburseRequestBody->number]),
+            "payeeNote" => $this->getPayeeNote(["amount" => $disburseRequestBody->amount, "number" => $disburseRequestBody->number]),
         ];
     }
 

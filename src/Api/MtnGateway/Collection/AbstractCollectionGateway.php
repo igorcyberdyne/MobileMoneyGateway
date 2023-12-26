@@ -50,23 +50,23 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
 
     public function getPayerMessage(): string
     {
-        $args = func_get_args();
+        $args = func_get_args()[0] ?? [];
 
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été débité d'un montant[[amount]]", $params);
+        return AbstractTools::injectVariables("Le compte au numéro [[number]] a été débité d'un montant de [[amount]] {$this->getCurrency()}", $params);
     }
 
 
     public function getPayeeNote(): string
     {
-        $args = func_get_args();
+        $args = func_get_args()[0] ?? [];
 
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Votre compte au numéro[[number]] a été débité de[[amount]]", $params);
+        return AbstractTools::injectVariables("Montant de [[amount]] {$this->getCurrency()} collecté sur le numéro [[number]]", $params);
     }
 
 

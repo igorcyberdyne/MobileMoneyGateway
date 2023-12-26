@@ -227,7 +227,7 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws CollectionException
      * @throws TokenCreationException
      */
-    public function test_requestToPay_THEN_success()
+    public function test_collect_THEN_success()
     {
         $this->createToken();
 
@@ -238,13 +238,15 @@ class AbstractCollectionGatewayTest extends TestCase
         );
 
         $this->assertTrue($this->collectionGateway->collect($collectRequest));
+        
+        return $collectRequest->reference;
     }
 
     /**
      * @throws CollectionException
      * @throws TokenCreationException
      */
-    public function test_requestToPay_GIVEN_zero_as_amount_THEN_expected_exception()
+    public function test_collect_GIVEN_zero_as_amount_THEN_expected_exception()
     {
         $this->createToken();
 
@@ -273,7 +275,7 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws CollectionException
      * @throws TokenCreationException
      */
-    public function test_requestToPay_GIVEN_bad_number_THEN_expected_exception(string $number)
+    public function test_collect_GIVEN_bad_number_THEN_expected_exception(string $number)
     {
         $this->createToken();
 
@@ -285,6 +287,90 @@ class AbstractCollectionGatewayTest extends TestCase
 
         $this->expectExceptionCode(CollectionException::REQUEST_TO_PAY_BAD_NUMBER);
         $this->collectionGateway->collect($collectRequest);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function test_collect_reference()
+    {
+        $reference = $this->test_collect_THEN_success();
+        $collectReference = $this->collectionGateway->collectReference($reference);
+
+        $this->assertIsArray($collectReference);
+        foreach ([
+                     "amount",
+                     "currency",
+                     "externalId",
+                     "payer",
+                     "payerMessage",
+                     "payeeNote",
+                     "status",
+                     "reason",
+                 ] as $key) {
+            $this->assertArrayHasKey($key, $collectReference);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_balance()
+    {
+        $balance = $this->createToken()->collectionGateway->balance();
+
+        $this->assertArrayHasKey("availableBalance", $balance);
+        $this->assertArrayHasKey("currency", $balance);
+        $this->assertEquals($this->collectionGateway->getCurrency(), $balance["currency"]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_accountHolderActive()
+    {
+        $this->assertTrue(
+            $this
+                ->createToken()
+                ->collectionGateway
+                ->accountHolderActive("066304925")
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_accountHolderBasicUserInfo()
+    {
+        $accountInfo = $this
+            ->createToken()
+            ->collectionGateway
+            ->accountHolderBasicUserInfo("46733123452")
+        ;
+
+        $this->assertIsArray($accountInfo);
+        foreach ([
+                     "name",
+                     "given_name",
+                     "family_name",
+                     "birthdate",
+                     "locale",
+                     "gender",
+                 ] as $key) {
+            $this->assertArrayHasKey($key, $accountInfo);
+        }
+
+        $accountInfo = [
+            "given_name" => $accountInfo["given_name"] ?? null,
+            "family_name" => $accountInfo["family_name"] ?? null,
+            "name" => $accountInfo["name"] ?? null,
+        ];
+        $this->assertEquals([
+            "given_name" => "Sand",
+            "family_name" => "Box",
+            "name" => "Sand Box",
+        ], $accountInfo);
     }
 
 }

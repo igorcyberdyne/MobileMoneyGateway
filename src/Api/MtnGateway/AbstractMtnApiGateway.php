@@ -303,15 +303,18 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
      * @throws AccountHolderException
      * @throws Exception
      */
-    public function accountHolderActive(string $phoneNumber): array
+    public function accountHolderActive(string $phoneNumber): bool
     {
+        if (1 !== preg_match('/^[0-9]+$/', $phoneNumber)) {
+            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BAD_NUMBER);
+        }
+
         $headers = [
             'Authorization' => $this->buildBearerToken(),
             'X-Target-Environment' => $this->currentApiEnvName(),
             'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
         ];
 
-        $phoneNumber = trim(str_replace(" ", "", $phoneNumber));
         $url = str_replace(['{accountHolderIdType}', '{accountHolderId}'], [strtolower(self::MSISDN_ACCOUNT_TYPE), $phoneNumber], $this->getAccountHolderUrl());
 
         try {
@@ -320,10 +323,12 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
             $response = $client->request(RequestMethod::GET, $url);
 
             if ($response->getStatusCode() != self::STATUS_SUCCESS) {
+                $response->toArray();
+
                 throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_CANNOT_BE_RETRIEVE);
             }
 
-            return $response->toArray();
+            return $response->toArray()["result"] === true;
         } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
             throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_REQUEST_ERROR, previous: $e);
         }
@@ -336,13 +341,16 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
      */
     public function accountHolderBasicUserInfo(string $phoneNumber): array
     {
+        if (1 !== preg_match('/^[0-9]+$/', $phoneNumber)) {
+            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BAD_NUMBER);
+        }
+
         $headers = [
             'Authorization' => $this->buildBearerToken(),
             'X-Target-Environment' => $this->currentApiEnvName(),
             'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
         ];
 
-        $phoneNumber = trim(str_replace(" ", "", $phoneNumber));
         $url = str_replace("{accountHolderMSISDN}", $phoneNumber, $this->getAccountHolderBasicInfoUrl());
 
         try {
@@ -372,11 +380,12 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
         ];
 
         try {
-
             $client = HttpClient::create(["headers" => $headers]);
             $response = $client->request(RequestMethod::GET, $this->getAccountBalanceUrl());
 
             if ($response->getStatusCode() != self::STATUS_SUCCESS) {
+                $response->toArray();
+
                 throw BalanceException::load(BalanceException::BALANCE_CANNOT_BE_RETRIEVE);
             }
 

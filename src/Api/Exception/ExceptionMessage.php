@@ -26,11 +26,11 @@ final class ExceptionMessage extends AbstractArrayKeyValue
             ],
             [
                 "key" => AccountHolderException::ACCOUNT_HOLDER_CANNOT_BE_RETRIEVE,
-                "value" => "Cannot retrieve account holder",
+                "value" => "Cannot check if account holder is active",
             ],
             [
                 "key" => AccountHolderException::ACCOUNT_HOLDER_REQUEST_ERROR,
-                "value" => "Cannot retrieve account holder basic info",
+                "value" => "Error when checking is account holder is active",
             ],
             [
                 "key" => AccountHolderException::ACCOUNT_HOLDER_BASIC_CANNOT_BE_RETRIEVE,
@@ -38,7 +38,11 @@ final class ExceptionMessage extends AbstractArrayKeyValue
             ],
             [
                 "key" => AccountHolderException::ACCOUNT_HOLDER_BASIC_INFO_REQUEST_ERROR,
-                "value" => "Error when checking account holder basic info",
+                "value" => "Error when getting account holder basic info",
+            ],
+            [
+                "key" => AccountHolderException::ACCOUNT_HOLDER_BAD_NUMBER,
+                "value" => "Bad number given",
             ],
             [
                 "key" => BalanceException::BALANCE_CANNOT_BE_RETRIEVE,

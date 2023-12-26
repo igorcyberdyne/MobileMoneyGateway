@@ -35,7 +35,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Ekolotech\\MobileMoney\\Gateway\\Tests\\": "tests/"
+      "Ekolotech\\MobileMoney\\Gateway\\Tests\\": "tests/",
+      "DemoApp\\": "DemoApp/"
     }
   },
   "require-dev": {
