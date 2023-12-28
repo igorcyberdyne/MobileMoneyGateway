@@ -3,6 +3,7 @@
 namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
 
 use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MobileMoney\Gateway\Api\Exception\AccountHolderException;
 use Ekolotech\MobileMoney\Gateway\Api\Exception\DisbursementException;
 use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
 use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
@@ -48,7 +49,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     }
 
 
-    public function getPayerMessage(): string
+    protected function getPayerMessage(): string
     {
         $args = func_get_args()[0] ?? [];
 
@@ -62,7 +63,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     }
 
 
-    public function getPayeeNote(): string
+    protected function getPayeeNote(): string
     {
         $args = func_get_args()[0] ?? [];
 
@@ -154,5 +155,23 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     {
         return $this->accountBalance();
     }
+    /**
+     * @param string $number
+     * @return bool
+     * @throws AccountHolderException
+     */
+    public function isAccountIsActive(string $number): bool
+    {
+        return $this->accountHolderActive($number);
+    }
 
+    /**
+     * @param string $number
+     * @return array
+     * @throws AccountHolderException
+     */
+    public function getAccountBasicInfo(string $number): array
+    {
+        return $this->accountHolderBasicUserInfo($number);
+    }
 }

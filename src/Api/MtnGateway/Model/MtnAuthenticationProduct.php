@@ -29,9 +29,9 @@ class MtnAuthenticationProduct
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getApiKey(): string
+    public function getApiKey(): ?string
     {
         return $this->apiKey;
     }

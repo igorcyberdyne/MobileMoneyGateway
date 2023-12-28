@@ -9,6 +9,10 @@ final class ExceptionMessage extends AbstractArrayKeyValue
 
         return [
             [
+                "key" => ProductTokenSessionException::PRODUCT_TOKEN_SESSION_NOT_FOUND,
+                "value" => "Product token session not found",
+            ],
+            [
                 "key" => ProductTokenSessionException::PRODUCT_TOKEN_SESSION_CANNOT_BE_CREATE,
                 "value" => "Product token session cannot be created",
             ],

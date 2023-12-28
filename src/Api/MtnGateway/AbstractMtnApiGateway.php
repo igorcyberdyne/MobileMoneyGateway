@@ -9,9 +9,8 @@ use Ekolotech\MobileMoney\Gateway\Api\Exception\TokenCreationException;
 use Ekolotech\MobileMoney\Gateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
 use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MessageInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiGatewayInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\OnMtnApiGatewayListenerInterface;
+use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigInterface;
+use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
@@ -22,7 +21,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageInterface
+abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 {
     const STATUS_SUCCESS = 200;
     const STATUS_CREATED = 201;
@@ -50,6 +49,22 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
         if (empty($this->authenticationProduct->getApiUser())) {
             throw new Exception("Authentication apiUser cannot be empty");
         }
+    }
+
+    /**
+     * @return MtnAuthenticationProduct
+     */
+    public function getAuthenticationProduct(): MtnAuthenticationProduct
+    {
+        return $this->authenticationProduct;
+    }
+
+    /**
+     * @return MtnAccessToken|null
+     */
+    public function getMtnAccessToken(): ?MtnAccessToken
+    {
+        return $this->mtnAccessToken;
     }
 
     public function getBaseApiUrl(): string
@@ -91,6 +106,65 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
     abstract protected function getAccountBalanceUrl(): string;
 
 
+    # ---------------- Config transaction message ---------------- #
+
+    /**
+     * @return string
+     *
+     * <p>You can provide an <b>array('key' => 'value')</b> in argument. <br/>
+     * The <b>key</b> of that array correspond to a variable.
+     * The available variables are :
+     * </p><table>
+     *
+     * <thead>
+     * <tr>
+     * <th>Variable</th>
+     * <th>Meaning</th>
+     * </tr>
+     * </thead>
+     *
+     * <tbody class="tbody">
+     * <tr>
+     * <td><b>number</b></td>
+     * <td>The client phone number</td>
+     * </tr>
+     *
+     * <tr>
+     * <td><b>amount</b></td>
+     * <td>The amount of transaction</td>
+     * </tr>
+     */
+    abstract protected function getPayerMessage(): string;
+
+
+    /**
+     * @return string
+     *
+     * <p>You can provide an <b>array('key' => 'value')</b> in argument. <br/>
+     * The <b>key</b> of that array correspond to a variable.
+     * The available variables are :
+     * </p><table>
+     *
+     * <thead>
+     * <tr>
+     * <th>Variable</th>
+     * <th>Meaning</th>
+     * </tr>
+     * </thead>
+     *
+     * <tbody class="tbody">
+     * <tr>
+     * <td><b>number</b></td>
+     * <td>The client phone number</td>
+     * </tr>
+     *
+     * <tr>
+     * <td><b>amount</b></td>
+     * <td>The amount of transaction</td>
+     * </tr>
+     */
+    abstract protected function getPayeeNote(): string;
+
     # ---------------- Config abstract method ---------------- #
     abstract public function getProviderCallbackUrl(): string;
 
@@ -126,7 +200,7 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
                 throw new Exception("Cannot create API User");
             }
 
-            if ($this instanceof OnMtnApiGatewayListenerInterface) {
+            if ($this instanceof MtnApiAccessConfigListenerInterface) {
                 try {
                     $this->onApiUserCreated();
                 } catch (Exception $exception) {
@@ -193,7 +267,7 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
             }
 
             // TODO dispatch event apiKey created
-            if ($this instanceof OnMtnApiGatewayListenerInterface) {
+            if ($this instanceof MtnApiAccessConfigListenerInterface) {
                 try {
                     $this->onApiKeyCreated($apiKey);
                 } catch (Exception $exception) {
@@ -209,9 +283,19 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
 
     /**
      * @throws TokenCreationException
+     * @throws Exception
      */
     public function createToken(): MtnAccessToken
     {
+        if (empty($this->authenticationProduct->getApiKey())) {
+
+            if ($this->isProd()) {
+                throw new Exception("Api key not configured in production");
+            }
+
+            $this->authenticationProduct->setApiKey($this->createApiKey());
+        }
+
         $headers = [
             'Authorization' => 'Basic ' . AbstractTools::basicAuth($this->authenticationProduct->getApiUser(), $this->authenticationProduct->getApiKey()),
             'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne()
@@ -236,7 +320,7 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
                 $tokeData["expires_in"],
             );
 
-            if ($this instanceof OnMtnApiGatewayListenerInterface) {
+            if ($this instanceof MtnApiAccessConfigListenerInterface) {
                 try {
                     $this->onTokenCreated($mtnAccessToken);
                 } catch (Exception $exception) {
@@ -303,7 +387,7 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
      * @throws AccountHolderException
      * @throws Exception
      */
-    public function accountHolderActive(string $phoneNumber): bool
+    protected function accountHolderActive(string $phoneNumber): bool
     {
         if (1 !== preg_match('/^[0-9]+$/', $phoneNumber)) {
             throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BAD_NUMBER);
@@ -339,7 +423,7 @@ abstract class AbstractMtnApiGateway implements MtnApiGatewayInterface, MessageI
      * @throws AccountHolderException
      * @throws Exception
      */
-    public function accountHolderBasicUserInfo(string $phoneNumber): array
+    protected function accountHolderBasicUserInfo(string $phoneNumber): array
     {
         if (1 !== preg_match('/^[0-9]+$/', $phoneNumber)) {
             throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BAD_NUMBER);
