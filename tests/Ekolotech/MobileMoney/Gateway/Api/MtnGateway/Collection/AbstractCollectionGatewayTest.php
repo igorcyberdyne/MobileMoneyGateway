@@ -140,7 +140,8 @@ class AbstractCollectionGatewayTest extends TestCase
         $mtnAccessToken = $this
             ->givenCollectGateway($auth)
             ->collectionGateway
-            ->createToken();
+            ->createToken()
+        ;
 
         $this->assertNotEmpty($mtnAccessToken);
 
@@ -334,7 +335,7 @@ class AbstractCollectionGatewayTest extends TestCase
             $this
                 ->createToken()
                 ->collectionGateway
-                ->accountHolderActive("066304925")
+                ->isAccountIsActive("066304925")
         );
     }
 
@@ -346,7 +347,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $accountInfo = $this
             ->createToken()
             ->collectionGateway
-            ->accountHolderBasicUserInfo("46733123452")
+            ->getAccountBasicInfo("46733123452")
         ;
 
         $this->assertIsArray($accountInfo);

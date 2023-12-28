@@ -324,7 +324,7 @@ class AbstractDisbursementGatewayTest extends TestCase
             $this
                 ->createToken()
                 ->disbursementGateway
-                ->accountHolderActive("066304925")
+                ->isAccountIsActive("066304925")
         );
     }
 
@@ -336,7 +336,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         $accountInfo = $this
             ->createToken()
             ->disbursementGateway
-            ->accountHolderBasicUserInfo("46733123452")
+            ->getAccountBasicInfo("46733123452")
         ;
 
         $this->assertIsArray($accountInfo);
