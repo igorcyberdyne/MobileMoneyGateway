@@ -1,8 +1,8 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
-use Ekolotech\MobileMoney\Gateway\Api\Model\Currency;
+use Ekolotech\MoMoGateway\Api\Model\Currency;
 
 class ProductionCollectionGateway extends AbstractCollectionGateway
 {

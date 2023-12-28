@@ -1,20 +1,16 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement;
 
-use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\AccountHolderException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\DisbursementException;
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
-use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\AbstractMtnApiGateway;
+use Ekolotech\MoMoGateway\Api\Dependencies\HttpClient;
+use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\RequestMethod;
+use Ekolotech\MoMoGateway\Api\MtnGateway\AbstractMtnApiGateway;
 use Exception;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Throwable;
 
 abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway implements DisbursementGatewayInterface
 {
@@ -105,9 +101,8 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
             }
 
             return true;
-        }
-        catch (Exception|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
-            throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $e);
+        } catch (Throwable $t) {
+            throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $t);
         }
     }
 

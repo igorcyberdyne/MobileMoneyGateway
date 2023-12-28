@@ -1,8 +1,8 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Exception;
+namespace Ekolotech\MoMoGateway\Api\Exception;
 
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractSingleton;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractSingleton;
 
 abstract class AbstractArrayKeyValue extends AbstractSingleton
 {

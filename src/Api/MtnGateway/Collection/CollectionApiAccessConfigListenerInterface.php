@@ -1,8 +1,8 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 
 interface CollectionApiAccessConfigListenerInterface extends MtnApiAccessConfigListenerInterface
 {

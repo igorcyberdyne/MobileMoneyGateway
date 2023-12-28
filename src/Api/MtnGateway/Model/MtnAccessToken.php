@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Model;
 
 class MtnAccessToken
 {

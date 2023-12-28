@@ -30,13 +30,13 @@
   },
   "autoload": {
     "psr-4": {
-      "Ekolotech\\MobileMoney\\Gateway\\": "src/",
+      "Ekolotech\\MoMoGateway\\": "src/",
       "DemoApp\\": "DemoApp/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Ekolotech\\MobileMoney\\Gateway\\Tests\\": "tests/"
+      "Ekolotech\\MoMoGateway\\Tests\\": "tests/"
     }
   },
   "require-dev": {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class SandboxDisbursementGatewayTest extends TestCase
+class SandboxCollectionGatewayTest extends TestCase
 {
     public function urlDataProvider(): array
     {
@@ -60,8 +60,9 @@ class SandboxDisbursementGatewayTest extends TestCase
      */
     public function test_url_for_local_environment(string $method, $data)
     {
-        $disbursementGateway = new SandboxDisbursementGateway($this->givenAuthenticationProduct());
+        $collectionGateway = new SandboxCollectionGateway($this->givenAuthenticationProduct());
 
-        $this->assertEquals($data, $disbursementGateway->$method());
+        $this->assertEquals($data, $collectionGateway->$method());
     }
+
 }

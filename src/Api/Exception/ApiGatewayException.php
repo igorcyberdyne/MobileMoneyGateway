@@ -1,8 +1,8 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Exception;
+namespace Ekolotech\MoMoGateway\Api\Exception;
 
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Exception;
 use InvalidArgumentException;
 use Throwable;

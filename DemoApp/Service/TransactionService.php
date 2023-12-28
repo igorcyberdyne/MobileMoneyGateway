@@ -4,9 +4,9 @@ namespace DemoApp\Service;
 
 use DemoApp\RepositoryImpl\InMemoryCollectionAccessRepository;
 use DemoApp\RepositoryImpl\InMemoryDisbursementAccessRepository;
-use Ekolotech\MobileMoney\Gateway\Api\Dto\CollectRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
+use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Exception;
 use function PHPUnit\Framework\assertTrue;
 

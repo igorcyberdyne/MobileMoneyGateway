@@ -1,20 +1,16 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
-use Ekolotech\MobileMoney\Gateway\Api\Dto\CollectRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\AccountHolderException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\CollectionException;
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
-use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\AbstractMtnApiGateway;
+use Ekolotech\MoMoGateway\Api\Dependencies\HttpClient;
+use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\RequestMethod;
+use Ekolotech\MoMoGateway\Api\MtnGateway\AbstractMtnApiGateway;
 use Exception;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Throwable;
 
 abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implements CollectionGatewayInterface
 {
@@ -103,9 +99,8 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
             }
 
             return true;
-        }
-        catch (Exception|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $e);
+        } catch (Throwable $t) {
+            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $t);
         }
     }
 

@@ -1,25 +1,21 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway;
 
-use Ekolotech\MobileMoney\Gateway\Api\Exception\AccountHolderException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\BalanceException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\ProductTokenSessionException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\TokenCreationException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\TransactionReferenceException;
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
-use Ekolotech\MobileMoney\Gateway\Api\Model\RequestMethod;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAccessToken;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Api\Dependencies\HttpClient;
+use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
+use Ekolotech\MoMoGateway\Api\Exception\ProductTokenSessionException;
+use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\RequestMethod;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Throwable;
 
 abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 {
@@ -209,8 +205,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return true;
-        } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|DecodingExceptionInterface|Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        } catch (Throwable $t) {
+            throw new Exception($t->getMessage(), $t->getCode(), $t);
         }
     }
 
@@ -232,8 +228,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $response->toArray();
-        } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|DecodingExceptionInterface|Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        } catch (Throwable $t) {
+            throw new Exception($t->getMessage(), $t->getCode(), $t);
         }
     }
 
@@ -276,8 +272,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $apiKey;
-        } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|DecodingExceptionInterface|Exception $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        } catch (Throwable $t) {
+            throw new Exception($t->getMessage(), $t->getCode(), $t);
         }
     }
 
@@ -329,8 +325,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $mtnAccessToken;
-        } catch (TransportExceptionInterface|DecodingExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
-            throw TokenCreationException::load(TokenCreationException::TOKEN_CREATION_ERROR, previous: $e);
+        } catch (Throwable $t) {
+            throw TokenCreationException::load(TokenCreationException::TOKEN_CREATION_ERROR, previous: $t);
         }
     }
 
@@ -378,8 +374,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $response->toArray();
-        } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
-            throw TransactionReferenceException::load(TransactionReferenceException::TRANSACTION_REFERENCE_REQUEST_ERROR, previous: $e);
+        } catch (Throwable $t) {
+            throw TransactionReferenceException::load(TransactionReferenceException::TRANSACTION_REFERENCE_REQUEST_ERROR, previous: $t);
         }
     }
 
@@ -413,8 +409,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $response->toArray()["result"] === true;
-        } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
-            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_REQUEST_ERROR, previous: $e);
+        } catch (Throwable $t) {
+            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_REQUEST_ERROR, previous: $t);
         }
 
     }
@@ -447,8 +443,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $response->toArray();
-        } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
-            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BASIC_INFO_REQUEST_ERROR, previous: $e);
+        } catch (Throwable $t) {
+            throw AccountHolderException::load(AccountHolderException::ACCOUNT_HOLDER_BASIC_INFO_REQUEST_ERROR, previous: $t);
         }
     }
 
@@ -474,8 +470,8 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
             return $response->toArray();
-        } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|Exception $e) {
-            throw BalanceException::load(BalanceException::BALANCE_REQUEST_ERROR, previous: $e);
+        } catch (Throwable $t) {
+            throw BalanceException::load(BalanceException::BALANCE_REQUEST_ERROR, previous: $t);
         }
     }
 

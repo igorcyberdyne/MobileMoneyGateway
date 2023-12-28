@@ -3,8 +3,8 @@
 namespace DemoApp;
 
 use DemoApp\Service\TransactionService;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;

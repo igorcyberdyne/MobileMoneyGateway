@@ -1,22 +1,30 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
-use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\DisbursementException;
-use Ekolotech\MobileMoney\Gateway\Api\Exception\TokenCreationException;
-use Ekolotech\MobileMoney\Gateway\Api\Helper\AbstractTools;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class TestDisbursementGateway extends SandboxDisbursementGateway
+
+class TestCollectionGateway extends SandboxCollectionGateway
 {
 }
-class AbstractDisbursementGatewayTest extends TestCase
-{
 
-    private AbstractDisbursementGateway $disbursementGateway;
+
+/**
+ * Test of that class on sandbox environment
+ * @see TestCollectionGateway
+ * @see SandboxCollectionGateway
+ * @see AbstractCollectionGateway
+ */
+class AbstractCollectionGatewayTest extends TestCase
+{
+    private AbstractCollectionGateway $collectionGateway;
     private string $apiUser;
     private static MtnAuthenticationProduct $authenticationProduct;
 
@@ -25,9 +33,9 @@ class AbstractDisbursementGatewayTest extends TestCase
         parent::setUp();
 
         static::$authenticationProduct = new MtnAuthenticationProduct(
-            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
-            "ac4f92d8be3e4801bd346d7a986cff52",
-            "a882e46cedd948b1abe31c513e4b822b",
+            "65a9c425-1d54-4a7b-b7d4-9c756f681920",
+            "0672b80420244d9f9d39330b0811e1cd",
+            "d57e01802dd3456fbfc6c2998dca2426",
         );
     }
 
@@ -54,9 +62,9 @@ class AbstractDisbursementGatewayTest extends TestCase
     /**
      * @throws Exception
      */
-    private function givenDisburseGateway(MtnAuthenticationProduct $auth): static
+    private function givenCollectGateway(MtnAuthenticationProduct $auth): static
     {
-        $this->disbursementGateway = new TestDisbursementGateway($auth);
+        $this->collectionGateway = new TestCollectionGateway($auth);
 
         return $this;
     }
@@ -74,12 +82,12 @@ class AbstractDisbursementGatewayTest extends TestCase
         );
 
         $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
+            ->givenCollectGateway($auth)
+            ->collectionGateway
             ->createApiUser();
         $this->assertEquals($this->apiUser, $auth->getApiUser());
 
-        $response = $this->disbursementGateway->getApiUser();
+        $response = $this->collectionGateway->getApiUser();
         $this->assertIsArray($response);
         $this->assertEquals(
             [
@@ -87,8 +95,8 @@ class AbstractDisbursementGatewayTest extends TestCase
                 "targetEnvironment" => "sandbox"
             ],
             [
-                "providerCallbackHost" => $this->disbursementGateway->getProviderCallbackHost(),
-                "targetEnvironment" => $this->disbursementGateway->currentApiEnvName()
+                "providerCallbackHost" => $this->collectionGateway->getProviderCallbackHost(),
+                "targetEnvironment" => $this->collectionGateway->currentApiEnvName()
             ],
         );
     }
@@ -106,8 +114,8 @@ class AbstractDisbursementGatewayTest extends TestCase
         );
 
         $apiKey = $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
+            ->givenCollectGateway($auth)
+            ->collectionGateway
             ->createApiKey();
 
         $this->assertNotEmpty($apiKey);
@@ -116,6 +124,7 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return AbstractCollectionGatewayTest
      * @throws TokenCreationException
      * @throws Exception
      */
@@ -129,9 +138,10 @@ class AbstractDisbursementGatewayTest extends TestCase
         );
 
         $mtnAccessToken = $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
-            ->createToken();
+            ->givenCollectGateway($auth)
+            ->collectionGateway
+            ->createToken()
+        ;
 
         $this->assertNotEmpty($mtnAccessToken);
 
@@ -150,7 +160,7 @@ class AbstractDisbursementGatewayTest extends TestCase
 
         $this->assertEquals(
             "https://sandbox.momodeveloper.mtn.com",
-            $this->givenDisburseGateway($auth)->disbursementGateway->getBaseApiUrl()
+            $this->givenCollectGateway($auth)->collectionGateway->getBaseApiUrl()
         );
     }
 
@@ -174,8 +184,8 @@ class AbstractDisbursementGatewayTest extends TestCase
 
         $this->expectException(Exception::class);
         $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
+            ->givenCollectGateway($auth)
+            ->collectionGateway
             ->createApiKey();
     }
 
@@ -200,8 +210,8 @@ class AbstractDisbursementGatewayTest extends TestCase
 
         $this->expectException(TokenCreationException::class);
         $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
+            ->givenCollectGateway($auth)
+            ->collectionGateway
             ->createToken();
     }
 
@@ -215,40 +225,40 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @throws CollectionException
      * @throws TokenCreationException
-     * @throws Exception
      */
-    public function test_disburse_THEN_success()
+    public function test_collect_THEN_success()
     {
         $this->createToken();
 
-        $disburseRequest = new DisburseRequestBody(
+        $collectRequest = new CollectRequestBody(
             1,
             "46733123452",
             AbstractTools::uuid()
         );
 
-        $this->assertTrue($this->disbursementGateway->disburse($disburseRequest));
-
-        return $disburseRequest->reference;
+        $this->assertTrue($this->collectionGateway->collect($collectRequest));
+        
+        return $collectRequest->reference;
     }
 
     /**
+     * @throws CollectionException
      * @throws TokenCreationException
-     * @throws Exception
      */
-    public function test_disburse_GIVEN_zero_as_amount_THEN_expected_exception()
+    public function test_collect_GIVEN_zero_as_amount_THEN_expected_exception()
     {
         $this->createToken();
 
-        $disburseRequest = new DisburseRequestBody(
+        $collectRequest = new CollectRequestBody(
             0,
             "46733123452",
             AbstractTools::uuid()
         );
 
-        $this->expectExceptionObject(DisbursementException::load(DisbursementException::DISBURSE_AMOUNT_CANNOT_BE_MINUS_ZERO));
-        $this->disbursementGateway->disburse($disburseRequest);
+        $this->expectExceptionObject(CollectionException::load(CollectionException::REQUEST_TO_PAY_AMOUNT_CANNOT_BE_MINUS_ZERO));
+        $this->collectionGateway->collect($collectRequest);
     }
 
     public function badNumberDataProvider(): array
@@ -263,43 +273,44 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @dataProvider badNumberDataProvider
+     * @throws CollectionException
      * @throws TokenCreationException
-     * @throws Exception
      */
-    public function test_disburse_GIVEN_bad_number_THEN_expected_exception(string $number)
+    public function test_collect_GIVEN_bad_number_THEN_expected_exception(string $number)
     {
         $this->createToken();
 
-        $disburseRequest = new DisburseRequestBody(
+        $collectRequest = new CollectRequestBody(
             1,
             $number,
             AbstractTools::uuid()
         );
 
-        $this->expectExceptionCode(DisbursementException::DISBURSE_BAD_NUMBER);
-        $this->disbursementGateway->disburse($disburseRequest);
+        $this->expectExceptionCode(CollectionException::REQUEST_TO_PAY_BAD_NUMBER);
+        $this->collectionGateway->collect($collectRequest);
     }
+
 
     /**
      * @throws Exception
      */
-    public function test_disburse_reference()
+    public function test_collect_reference()
     {
-        $reference = $this->test_disburse_THEN_success();
-        $disburseReference = $this->disbursementGateway->disburseReference($reference);
+        $reference = $this->test_collect_THEN_success();
+        $collectReference = $this->collectionGateway->collectReference($reference);
 
-        $this->assertIsArray($disburseReference);
+        $this->assertIsArray($collectReference);
         foreach ([
-            "amount",
-            "currency",
-            "externalId",
-            "payee",
-            "payerMessage",
-            "payeeNote",
-            "status",
-            "reason",
-                     ] as $key) {
-            $this->assertArrayHasKey($key, $disburseReference);
+                     "amount",
+                     "currency",
+                     "externalId",
+                     "payer",
+                     "payerMessage",
+                     "payeeNote",
+                     "status",
+                     "reason",
+                 ] as $key) {
+            $this->assertArrayHasKey($key, $collectReference);
         }
     }
 
@@ -308,11 +319,11 @@ class AbstractDisbursementGatewayTest extends TestCase
      */
     public function test_balance()
     {
-        $balance = $this->createToken()->disbursementGateway->balance();
+        $balance = $this->createToken()->collectionGateway->balance();
 
         $this->assertArrayHasKey("availableBalance", $balance);
         $this->assertArrayHasKey("currency", $balance);
-        $this->assertEquals($this->disbursementGateway->getCurrency(), $balance["currency"]);
+        $this->assertEquals($this->collectionGateway->getCurrency(), $balance["currency"]);
     }
 
     /**
@@ -323,7 +334,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         $this->assertTrue(
             $this
                 ->createToken()
-                ->disbursementGateway
+                ->collectionGateway
                 ->isAccountIsActive("066304925")
         );
     }
@@ -335,19 +346,19 @@ class AbstractDisbursementGatewayTest extends TestCase
     {
         $accountInfo = $this
             ->createToken()
-            ->disbursementGateway
+            ->collectionGateway
             ->getAccountBasicInfo("46733123452")
         ;
 
         $this->assertIsArray($accountInfo);
         foreach ([
-             "name",
-             "given_name",
-             "family_name",
-             "birthdate",
-             "locale",
-             "gender",
-                     ] as $key) {
+                     "name",
+                     "given_name",
+                     "family_name",
+                     "birthdate",
+                     "locale",
+                     "gender",
+                 ] as $key) {
             $this->assertArrayHasKey($key, $accountInfo);
         }
 

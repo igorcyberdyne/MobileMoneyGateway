@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Helper;
+namespace Ekolotech\MoMoGateway\Api\Helper;
 
 use Ramsey\Uuid\Uuid;
 

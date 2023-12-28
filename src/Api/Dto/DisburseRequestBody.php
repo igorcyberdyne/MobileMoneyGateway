@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Dto;
+namespace Ekolotech\MoMoGateway\Api\Dto;
 class DisburseRequestBody
 {
     public function __construct(

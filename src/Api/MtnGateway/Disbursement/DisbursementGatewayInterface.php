@@ -1,8 +1,8 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Disbursement;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement;
 
-use Ekolotech\MobileMoney\Gateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
 
 interface DisbursementGatewayInterface
 {

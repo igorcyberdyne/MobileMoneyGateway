@@ -3,10 +3,10 @@
 namespace DemoApp\Service;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Collection\SandboxCollectionGateway;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAccessToken;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\SandboxCollectionGateway;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 
 final class CollectionGatewayService extends SandboxCollectionGateway implements MtnApiAccessConfigListenerInterface
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Interface;
+namespace Ekolotech\MoMoGateway\Api\MtnGateway\Interface;
 
-use Ekolotech\MobileMoney\Gateway\Api\Interface\ApiGatewayInterface;
-use Ekolotech\MobileMoney\Gateway\Api\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\Api\Interface\ApiGatewayInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 
 interface MtnApiAccessConfigInterface extends ApiGatewayInterface
 {

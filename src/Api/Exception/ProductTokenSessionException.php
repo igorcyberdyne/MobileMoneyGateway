@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Exception;
+namespace Ekolotech\MoMoGateway\Api\Exception;
 
 class ProductTokenSessionException extends ApiGatewayException
 {

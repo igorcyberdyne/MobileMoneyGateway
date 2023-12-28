@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MobileMoney\Gateway\Api\Interface;
+namespace Ekolotech\MoMoGateway\Api\Interface;
 
 interface ApiGatewayInterface
 {
