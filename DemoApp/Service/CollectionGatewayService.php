@@ -3,12 +3,13 @@
 namespace DemoApp\Service;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\SandboxCollectionGateway;
+use Ekolotech\MoMoGateway\Api\Model\Currency;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\AbstractCollectionGateway;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class CollectionGatewayService extends SandboxCollectionGateway implements MtnApiAccessConfigListenerInterface
+final class CollectionGatewayService extends AbstractCollectionGateway implements MtnApiAccessConfigListenerInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
@@ -23,6 +24,26 @@ final class CollectionGatewayService extends SandboxCollectionGateway implements
             ),
             $this->accessRepository->getMtnAccessToken()
         );
+    }
+
+    public function getProviderCallbackUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
+    public function getProviderCallbackHost(): string
+    {
+        return "sandbox.momodeveloper.mtn.com";
+    }
+
+    public function isProd(): bool
+    {
+        return false;
+    }
+
+    public function getCurrency(): string
+    {
+        return Currency::EUR;
     }
 
     public function onApiUserCreated(): void

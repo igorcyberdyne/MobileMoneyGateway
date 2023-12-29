@@ -3,12 +3,13 @@
 namespace DemoApp\Service;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\SandboxDisbursementGateway;
+use Ekolotech\MoMoGateway\Api\Model\Currency;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\AbstractDisbursementGateway;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class DisbursementGatewayService extends SandboxDisbursementGateway implements MtnApiAccessConfigListenerInterface
+final class DisbursementGatewayService extends AbstractDisbursementGateway implements MtnApiAccessConfigListenerInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
@@ -23,6 +24,26 @@ final class DisbursementGatewayService extends SandboxDisbursementGateway implem
             ),
             $this->accessRepository->getMtnAccessToken()
         );
+    }
+
+    public function getProviderCallbackUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
+    public function getProviderCallbackHost(): string
+    {
+        return "sandbox.momodeveloper.mtn.com";
+    }
+
+    public function isProd(): bool
+    {
+        return false;
+    }
+
+    public function getCurrency(): string
+    {
+        return Currency::EUR;
     }
 
     public function onApiUserCreated(): void

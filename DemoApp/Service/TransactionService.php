@@ -7,14 +7,16 @@ use DemoApp\RepositoryImpl\InMemoryDisbursementAccessRepository;
 use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
 use function PHPUnit\Framework\assertTrue;
 
 final class TransactionService
 {
     private array $inMemoryReference = [];
-    private CollectionGatewayService $collectionGateway;
-    private DisbursementGatewayService $disbursementGateway;
+    private CollectionGatewayInterface $collectionGateway;
+    private DisbursementGatewayInterface $disbursementGateway;
 
     /**
      * @throws Exception
@@ -90,17 +92,17 @@ final class TransactionService
     }
 
     /**
-     * @return CollectionGatewayService
+     * @return CollectionGatewayInterface
      */
-    public function getCollectionGateway(): CollectionGatewayService
+    public function getCollectionGateway(): CollectionGatewayInterface
     {
         return $this->collectionGateway;
     }
 
     /**
-     * @return DisbursementGatewayService
+     * @return DisbursementGatewayInterface
      */
-    public function getDisbursementGateway(): DisbursementGatewayService
+    public function getDisbursementGateway(): DisbursementGatewayInterface
     {
         return $this->disbursementGateway;
     }

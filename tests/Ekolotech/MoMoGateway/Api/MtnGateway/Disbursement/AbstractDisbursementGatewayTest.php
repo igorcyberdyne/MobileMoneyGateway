@@ -6,12 +6,32 @@ use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\Currency;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class TestDisbursementGateway extends SandboxDisbursementGateway
+class TestDisbursementGateway extends AbstractDisbursementGateway
 {
+    public function getProviderCallbackUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
+    public function getProviderCallbackHost(): string
+    {
+        return "sandbox.momodeveloper.mtn.com";
+    }
+
+    public function isProd(): bool
+    {
+        return false;
+    }
+
+    public function getCurrency(): string
+    {
+        return Currency::EUR;
+    }
 }
 class AbstractDisbursementGatewayTest extends TestCase
 {
@@ -136,6 +156,48 @@ class AbstractDisbursementGatewayTest extends TestCase
         $this->assertNotEmpty($mtnAccessToken);
 
         return $this;
+    }
+
+
+    public function urlDataProvider(): array
+    {
+        return [
+            [
+                "method" => "getBaseApiUrl",
+                "data" => "https://sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "currentApiEnvName",
+                "data" => "sandbox",
+            ],
+            [
+                "method" => "getProviderCallbackUrl",
+                "data" => "https://sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "getProviderCallbackHost",
+                "data" => "sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "isProd",
+                "data" => false,
+            ],
+            [
+                "method" => "getCurrency",
+                "data" => "EUR",
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider urlDataProvider
+     * @throws Exception
+     */
+    public function test_url_for_local_environment(string $method, $data)
+    {
+        $disbursementGateway = new TestDisbursementGateway($this->givenAuthenticationProduct());
+
+        $this->assertEquals($data, $disbursementGateway->$method());
     }
 
     /**
@@ -308,6 +370,7 @@ class AbstractDisbursementGatewayTest extends TestCase
      */
     public function test_balance()
     {
+        sleep(10);
         $balance = $this->createToken()->disbursementGateway->balance();
 
         $this->assertArrayHasKey("availableBalance", $balance);

@@ -6,20 +6,39 @@ use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\Currency;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
 
-class TestCollectionGateway extends SandboxCollectionGateway
+class TestCollectionGateway extends AbstractCollectionGateway
 {
+    public function getProviderCallbackUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
+    public function getProviderCallbackHost(): string
+    {
+        return "sandbox.momodeveloper.mtn.com";
+    }
+
+    public function isProd(): bool
+    {
+        return false;
+    }
+
+    public function getCurrency(): string
+    {
+        return Currency::EUR;
+    }
 }
 
 
 /**
  * Test of that class on sandbox environment
  * @see TestCollectionGateway
- * @see SandboxCollectionGateway
  * @see AbstractCollectionGateway
  */
 class AbstractCollectionGatewayTest extends TestCase
@@ -146,6 +165,48 @@ class AbstractCollectionGatewayTest extends TestCase
         $this->assertNotEmpty($mtnAccessToken);
 
         return $this;
+    }
+
+
+    public function urlDataProvider(): array
+    {
+        return [
+            [
+                "method" => "getBaseApiUrl",
+                "data" => "https://sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "currentApiEnvName",
+                "data" => "sandbox",
+            ],
+            [
+                "method" => "getProviderCallbackUrl",
+                "data" => "https://sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "getProviderCallbackHost",
+                "data" => "sandbox.momodeveloper.mtn.com",
+            ],
+            [
+                "method" => "isProd",
+                "data" => false,
+            ],
+            [
+                "method" => "getCurrency",
+                "data" => "EUR",
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider urlDataProvider
+     * @throws Exception
+     */
+    public function test_url_for_local_environment(string $method, $data)
+    {
+        $collectionGateway = new TestCollectionGateway($this->givenAuthenticationProduct());
+
+        $this->assertEquals($data, $collectionGateway->$method());
     }
 
     /**
@@ -319,6 +380,7 @@ class AbstractCollectionGatewayTest extends TestCase
      */
     public function test_balance()
     {
+        sleep(10);
         $balance = $this->createToken()->collectionGateway->balance();
 
         $this->assertArrayHasKey("availableBalance", $balance);
