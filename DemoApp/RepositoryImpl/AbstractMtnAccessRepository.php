@@ -38,8 +38,7 @@ abstract class AbstractMtnAccessRepository extends AbstractFileStoreRepository
 
         try {
             $isExpired = strtotime(date("Y-m-d H:i:s")) >= strtotime((new DateTime($this->getStore()["mtnAccessToken"]["expiredAt"]))->modify("-10 minutes")->format("Y-m-d H:i:s"));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $isExpired = true;
         }
 
@@ -59,7 +58,7 @@ abstract class AbstractMtnAccessRepository extends AbstractFileStoreRepository
         $expiredMinutes = $mtnAccessToken->getExpiresIn() / 60;
 
         $expirationDate = new DateTime();
-        $expirationDate->modify("+" . (int) ($mtnAccessToken->getExpiresIn() > 60 ? $expiredMinutes : 10) . " minutes");
+        $expirationDate->modify("+" . (int)($mtnAccessToken->getExpiresIn() > 60 ? $expiredMinutes : 10) . " minutes");
 
         $this->setStore([
             "mtnAccessToken" => [

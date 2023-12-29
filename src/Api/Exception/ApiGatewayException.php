@@ -9,8 +9,9 @@ use Throwable;
 
 class ApiGatewayException extends Exception implements Throwable
 {
-    protected string $errorKey = "ApiGateway error #";
     protected static array $_instance = [];
+    protected string $errorKey = "ApiGateway error #";
+
     public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
     {
         parent::__construct(!empty($message) ? "# $message." : $this->errorKey . $code, $code, $previous);
@@ -34,7 +35,7 @@ class ApiGatewayException extends Exception implements Throwable
         return static::getInstance($message, $code, $previous);
     }
 
-    private static function getInstance(string $message, int $code, Throwable $previous = null) : static
+    private static function getInstance(string $message, int $code, Throwable $previous = null): static
     {
         $className = get_called_class();
         $className .= AbstractTools::slugify("$className-$message-$code");
@@ -45,7 +46,7 @@ class ApiGatewayException extends Exception implements Throwable
 
         try {
             static::$_instance[$className] = new static($message, $code, $previous);
-        } catch (Exception){
+        } catch (Exception) {
             static::$_instance[$className] = new static();
         }
 

@@ -8,6 +8,7 @@ use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 interface MtnApiAccessConfigInterface extends ApiGatewayInterface
 {
     public function getApiUser(): array;
+
     public function createApiUser(): bool;
 
     public function createApiKey(): string;

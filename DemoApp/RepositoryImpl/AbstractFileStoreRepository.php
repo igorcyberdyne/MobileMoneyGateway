@@ -22,25 +22,6 @@ abstract class AbstractFileStoreRepository
     }
 
     /**
-     * @return array
-     */
-    protected function getStore(): array
-    {
-        return $this->store;
-    }
-
-    /**
-     * @param array $store
-     * @throws Exception
-     */
-    public function setStore(array $store): void
-    {
-        $this->store = array_merge($this->store, $store);
-
-        $this->saveStore();
-    }
-
-    /**
      * @return void
      * @throws Exception
      */
@@ -61,6 +42,24 @@ abstract class AbstractFileStoreRepository
         }
     }
 
+    /**
+     * @return array
+     */
+    protected function getStore(): array
+    {
+        return $this->store;
+    }
+
+    /**
+     * @param array $store
+     * @throws Exception
+     */
+    public function setStore(array $store): void
+    {
+        $this->store = array_merge($this->store, $store);
+
+        $this->saveStore();
+    }
 
     /**
      * @throws Exception

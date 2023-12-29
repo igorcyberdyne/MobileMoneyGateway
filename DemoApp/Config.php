@@ -11,6 +11,7 @@ abstract class Config
     {
         return __DIR__;
     }
+
     public static function dataDir(): string
     {
         $dir = self::projectDir() . "/Data";

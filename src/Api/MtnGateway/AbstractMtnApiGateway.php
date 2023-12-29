@@ -47,22 +47,6 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
         }
     }
 
-    /**
-     * @return MtnAuthenticationProduct
-     */
-    public function getAuthenticationProduct(): MtnAuthenticationProduct
-    {
-        return $this->authenticationProduct;
-    }
-
-    /**
-     * @return MtnAccessToken|null
-     */
-    public function getMtnAccessToken(): ?MtnAccessToken
-    {
-        return $this->mtnAccessToken;
-    }
-
     public function getBaseApiUrl(): string
     {
         return $this->isProd() ? "https://proxy.momoapi.mtn.com" : "https://sandbox.momodeveloper.mtn.com";

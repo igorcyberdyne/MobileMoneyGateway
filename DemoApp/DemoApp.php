@@ -10,7 +10,8 @@ use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertIsArray;
 
-require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
+
 class DemoApp
 {
     private TransactionService $transactionService;
@@ -104,11 +105,11 @@ class DemoApp
 
         }, __METHOD__);
     }
-    
+
     private function accountHolderProcess(
-        string $number,
+        string                                                  $number,
         CollectionGatewayInterface|DisbursementGatewayInterface $gateway,
-        string $processName
+        string                                                  $processName
     ): void
     {
         $this->execute(
@@ -131,6 +132,7 @@ class DemoApp
             __METHOD__
         );
     }
+
     public function disburseAccountHolderProcess(string $number): void
     {
         $this->accountHolderProcess(
@@ -139,7 +141,6 @@ class DemoApp
             __METHOD__
         );
     }
-
 
 
     /**

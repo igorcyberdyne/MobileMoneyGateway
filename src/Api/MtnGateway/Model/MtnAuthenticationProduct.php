@@ -15,7 +15,7 @@ class MtnAuthenticationProduct
         private readonly string $apiUser,
         private readonly string $subscriptionKeyOne,
         private readonly string $subscriptionKeyTwo,
-        private ?string $apiKey = null
+        private ?string         $apiKey = null
     )
     {
     }

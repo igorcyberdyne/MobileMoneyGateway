@@ -10,11 +10,9 @@ use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
-use function PHPUnit\Framework\assertTrue;
 
 final class TransactionService
 {
-    private array $inMemoryReference = [];
     private CollectionGatewayInterface $collectionGateway;
     private DisbursementGatewayInterface $disbursementGateway;
 
@@ -44,8 +42,6 @@ final class TransactionService
             throw new Exception("Collect not perform");
         }
 
-        $this->inMemoryReference["collection"][$reference] = $body;
-
         return $reference;
     }
 
@@ -54,8 +50,6 @@ final class TransactionService
      */
     public function checkCollect(string $reference): array
     {
-        assertTrue(!empty($this->inMemoryReference["collection"][$reference]), "Collect reference given dont exist !");
-
         return $this->collectionGateway->collectReference($reference);
     }
 
@@ -76,8 +70,6 @@ final class TransactionService
             throw new Exception("Disburse not perform");
         }
 
-        $this->inMemoryReference["disbursement"][$reference] = $body;
-
         return $reference;
     }
 
@@ -86,8 +78,6 @@ final class TransactionService
      */
     public function checkDisburse(string $reference): array
     {
-        assertTrue(!empty($this->inMemoryReference["disbursement"][$reference]), "Disburse reference given dont exist !");
-
         return $this->disbursementGateway->disburseReference($reference);
     }
 

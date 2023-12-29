@@ -4,5 +4,5 @@ namespace Ekolotech\MoMoGateway\Api\Interface;
 
 interface ApiGatewayInterface
 {
-    public function getBaseApiUrl() : string;
+    public function getBaseApiUrl(): string;
 }
