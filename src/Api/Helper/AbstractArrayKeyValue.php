@@ -1,8 +1,7 @@
 <?php
 
-namespace Ekolotech\MoMoGateway\Api\Exception;
+namespace Ekolotech\MoMoGateway\Api\Helper;
 
-use Ekolotech\MoMoGateway\Api\Helper\AbstractSingleton;
 
 abstract class AbstractArrayKeyValue extends AbstractSingleton
 {

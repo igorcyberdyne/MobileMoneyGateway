@@ -52,4 +52,14 @@ class ApiGatewayException extends Exception implements Throwable
 
         return static::$_instance[$className];
     }
+
+    public function getCodeOrigin(): ?int
+    {
+        return $this->getPrevious()?->getCode();
+    }
+
+    public function getMessageOrigin(): ?string
+    {
+        return $this->getPrevious()?->getMessage();
+    }
 }

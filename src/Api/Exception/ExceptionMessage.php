@@ -2,11 +2,12 @@
 
 namespace Ekolotech\MoMoGateway\Api\Exception;
 
+use Ekolotech\MoMoGateway\Api\Helper\AbstractArrayKeyValue;
+
 final class ExceptionMessage extends AbstractArrayKeyValue
 {
     protected function list(): array
     {
-
         return [
             [
                 "key" => ProductTokenSessionException::PRODUCT_TOKEN_SESSION_NOT_FOUND,

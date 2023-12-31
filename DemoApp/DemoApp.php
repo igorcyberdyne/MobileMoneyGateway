@@ -3,6 +3,7 @@
 namespace DemoApp;
 
 use DemoApp\Service\TransactionService;
+use Ekolotech\MoMoGateway\Api\Exception\ApiGatewayException;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
@@ -68,13 +69,14 @@ class DemoApp
 
     /**
      * @param string $number
+     * @param int $amount
      * @return void
      * @throws Exception
      */
-    public function makeCollectAndCheckingProcess(string $number): void
+    public function makeCollectAndCheckingProcess(string $number, int $amount): void
     {
-        $this->execute(function () use ($number) {
-            $collectReference = $this->transactionService->executeCollect(1, $number);
+        $this->execute(function () use ($amount, $number) {
+            $collectReference = $this->transactionService->executeCollect($amount, $number);
             $this->display("Collect reference created --> [[$collectReference]]");
 
             $collectCheckingData = $this->transactionService->checkCollect($collectReference);
@@ -86,15 +88,43 @@ class DemoApp
         }, __METHOD__);
     }
 
+
     /**
-     * @param string $number
      * @return void
      * @throws Exception
      */
-    public function makeDisburseAndCheckingProcess(string $number): void
+    public function makeCollectBalanceProcess(): void
     {
-        $this->execute(function () use ($number) {
-            $disburseReference = $this->transactionService->executeDisburse(1, $number);
+        $this->execute(function () {
+            $balance = $this->transactionService->collectBalance();
+            assertIsArray($balance);
+            $this->display("Collect balance --> [[{$balance['availableBalance']} {$balance['currency']}]]");
+        }, __METHOD__);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function makeDisburseBalanceProcess(): void
+    {
+        $this->execute(function () {
+            $balance = $this->transactionService->disburseBalance();
+            assertIsArray($balance);
+            $this->display("Disburse balance --> [[{$balance['availableBalance']} {$balance['currency']}]]");
+        }, __METHOD__);
+    }
+
+    /**
+     * @param string $number
+     * @param int $amount
+     * @return void
+     * @throws Exception
+     */
+    public function makeDisburseAndCheckingProcess(string $number, int $amount): void
+    {
+        $this->execute(function () use ($amount, $number) {
+            $disburseReference = $this->transactionService->executeDisburse($amount, $number);
             $this->display("Disburse reference created --> [[$disburseReference]]");
 
             $disburseCheckingData = $this->transactionService->checkDisburse($disburseReference);
@@ -118,7 +148,23 @@ class DemoApp
 
                 assertIsArray($basicInfo);
 
-                $this->display("Account basic info --> \n" . var_export($basicInfo, true));
+                $this->display("Account basic info name --> [[{$basicInfo['name']}]]");
+            },
+            $processName
+        );
+    }
+
+    private function isAccountHolderActiveProcess(
+        string                                                  $number,
+        CollectionGatewayInterface|DisbursementGatewayInterface $gateway,
+        string                                                  $processName
+    ): void
+    {
+        $this->execute(
+            function () use ($gateway, $number) {
+                $isAccountIsActive = $gateway->isAccountIsActive($number);
+
+                $this->display("Is mobile money account is active for number [[$number]] ? --> [[" . ($isAccountIsActive ? "YES" : "NO") . "]]");
             },
             $processName
         );
@@ -127,6 +173,15 @@ class DemoApp
     public function collectAccountHolderProcess(string $number): void
     {
         $this->accountHolderProcess(
+            $number,
+            $this->transactionService->getCollectionGateway(),
+            __METHOD__
+        );
+    }
+
+    public function collectIsAccountHolderActiveProcess(string $number): void
+    {
+        $this->isAccountHolderActiveProcess(
             $number,
             $this->transactionService->getCollectionGateway(),
             __METHOD__
@@ -142,6 +197,15 @@ class DemoApp
         );
     }
 
+    public function disburseIsAccountHolderActiveProcess(string $number): void
+    {
+        $this->isAccountHolderActiveProcess(
+            $number,
+            $this->transactionService->getDisbursementGateway(),
+            __METHOD__
+        );
+    }
+
 
     /**
      * @throws Exception
@@ -149,17 +213,27 @@ class DemoApp
     public function runApp(): void
     {
         $number = "066304920";
-        $this->makeCollectAndCheckingProcess($number);
-        $this->collectAccountHolderProcess($number);
 
-        $this->makeDisburseAndCheckingProcess($number);
+        $this->display("****************************** START COLLECT PROCESS ******************************");
+        $this->makeCollectAndCheckingProcess($number, 1);
+        $this->collectAccountHolderProcess($number);
+        $this->collectIsAccountHolderActiveProcess($number);
+        $this->makeCollectBalanceProcess();
+
+
+        $this->display("****************************** START DISBURSE PROCESS ******************************");
+        $this->makeDisburseAndCheckingProcess($number, 1);
         $this->disburseAccountHolderProcess($number);
+        $this->disburseIsAccountHolderActiveProcess($number);
+        $this->makeDisburseBalanceProcess();
     }
 }
 
 try {
     $demoApp = new DemoApp();
     $demoApp->runApp();
-} catch (Exception $e) {
-    echo DemoApp::colorLog("App error : " . $e->getMessage() . DemoApp::colorLog("", ""), "e");
+    exit(0);
+} catch (Exception|ApiGatewayException $e) {
+    echo DemoApp::colorLog("[[APP ERROR]] Code -> {$e->getCode()}, Message -> {$e->getMessage()}; {$e->getMessageOrigin()}, " . DemoApp::colorLog("", ""), "e");
+    exit(1);
 }

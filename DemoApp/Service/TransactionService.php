@@ -56,6 +56,14 @@ final class TransactionService
     /**
      * @throws Exception
      */
+    public function collectBalance(): array
+    {
+        return $this->collectionGateway->balance();
+    }
+
+    /**
+     * @throws Exception
+     */
     public function executeDisburse(int $amount, string $number): string
     {
         $reference = AbstractTools::uuid();
@@ -79,6 +87,14 @@ final class TransactionService
     public function checkDisburse(string $reference): array
     {
         return $this->disbursementGateway->disburseReference($reference);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function disburseBalance(): array
+    {
+        return $this->disbursementGateway->balance();
     }
 
     /**
