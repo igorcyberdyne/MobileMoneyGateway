@@ -1,15 +1,16 @@
 <?php
 
-namespace DemoApp\Service;
+namespace DemoApp\Service\ByInherit;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\AbstractCollectionGateway;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiEnvironmentInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class CollectionGatewayService extends AbstractCollectionGateway implements MtnApiAccessConfigListenerInterface
+final class CollectionGatewayService extends AbstractCollectionGateway implements MtnApiEnvironmentInterface, MtnApiAccessConfigListenerInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
@@ -49,7 +50,6 @@ final class CollectionGatewayService extends AbstractCollectionGateway implement
     public function onApiUserCreated(): void
     {
         // TODO: Implement onApiUserCreated() method.
-        var_dump("------------- onApiUserCreated -------------");
     }
 
     public function onApiKeyCreated(string $apiKey): void

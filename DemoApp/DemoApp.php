@@ -218,13 +218,16 @@ class DemoApp
         $this->makeCollectAndCheckingProcess($number, 1);
         $this->collectAccountHolderProcess($number);
         $this->collectIsAccountHolderActiveProcess($number);
+        sleep(5);
         $this->makeCollectBalanceProcess();
 
 
+        sleep(10);
         $this->display("****************************** START DISBURSE PROCESS ******************************");
         $this->makeDisburseAndCheckingProcess($number, 1);
         $this->disburseAccountHolderProcess($number);
         $this->disburseIsAccountHolderActiveProcess($number);
+        sleep(5);
         $this->makeDisburseBalanceProcess();
     }
 }
@@ -233,7 +236,9 @@ try {
     $demoApp = new DemoApp();
     $demoApp->runApp();
     exit(0);
-} catch (Exception|ApiGatewayException $e) {
-    echo DemoApp::colorLog("[[APP ERROR]] Code -> {$e->getCode()}, Message -> {$e->getMessage()}; {$e->getMessageOrigin()}, " . DemoApp::colorLog("", ""), "e");
+} catch (Exception $e) {
+    $message = $e instanceof ApiGatewayException ? $e->getMessage() . "; " . $e->getMessageOrigin() : $e->getMessage();
+
+    echo DemoApp::colorLog("[[APP ERROR]] Code -> {$e->getCode()}, Message -> $message, " . DemoApp::colorLog("", ""), "e");
     exit(1);
 }

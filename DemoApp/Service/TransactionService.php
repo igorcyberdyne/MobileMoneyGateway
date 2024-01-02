@@ -4,9 +4,15 @@ namespace DemoApp\Service;
 
 use DemoApp\RepositoryImpl\InMemoryCollectionAccessRepository;
 use DemoApp\RepositoryImpl\InMemoryDisbursementAccessRepository;
+use DemoApp\Service\ByFactory\CollectionGatewayServiceImpl;
+use DemoApp\Service\ByFactory\DisbursementGatewayServiceImpl;
+use DemoApp\Service\ByInherit\CollectionGatewayService;
+use DemoApp\Service\ByInherit\DisbursementGatewayService;
 use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Factory\ApiGatewayFactory;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Api\Model\GatewayProductType;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
@@ -19,8 +25,21 @@ final class TransactionService
     /**
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(bool $useFactory = true)
     {
+        if ($useFactory) {
+            $this->collectionGateway = ApiGatewayFactory::loadMtnGateway(
+                GatewayProductType::MtnCollectionGateway,
+                new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository())
+            );
+            $this->disbursementGateway = ApiGatewayFactory::loadMtnGateway(
+                GatewayProductType::MtnDisbursementGateway,
+                new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository())
+            );
+
+            return;
+        }
+
         $this->collectionGateway = new CollectionGatewayService(new InMemoryCollectionAccessRepository());
         $this->disbursementGateway = new DisbursementGatewayService(new InMemoryDisbursementAccessRepository());
     }

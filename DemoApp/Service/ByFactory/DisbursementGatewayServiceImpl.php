@@ -1,29 +1,19 @@
 <?php
 
-namespace DemoApp\Service;
+namespace DemoApp\Service\ByFactory;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\AbstractDisbursementGateway;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class DisbursementGatewayService extends AbstractDisbursementGateway implements MtnApiAccessConfigListenerInterface
+final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
     )
     {
-        parent::__construct(
-            new MtnAuthenticationProduct(
-                "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
-                "ac4f92d8be3e4801bd346d7a986cff52",
-                "a882e46cedd948b1abe31c513e4b822b",
-                $this->accessRepository->getApiKey()
-            ),
-            $this->accessRepository->getMtnAccessToken()
-        );
     }
 
     public function getProviderCallbackUrl(): string
@@ -49,7 +39,6 @@ final class DisbursementGatewayService extends AbstractDisbursementGateway imple
     public function onApiUserCreated(): void
     {
         // TODO: Implement onApiUserCreated() method.
-        var_dump("------------- onApiUserCreated -------------");
     }
 
     public function onApiKeyCreated(string $apiKey): void
@@ -62,4 +51,18 @@ final class DisbursementGatewayService extends AbstractDisbursementGateway imple
         $this->accessRepository->saveMtnAccessToken($mtnAccessToken);
     }
 
+    public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
+    {
+        return new MtnAuthenticationProduct(
+            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
+            "ac4f92d8be3e4801bd346d7a986cff52",
+            "a882e46cedd948b1abe31c513e4b822b",
+            $this->accessRepository->getApiKey()
+        );
+    }
+
+    public function getMtnAccessToken(): ?MtnAccessToken
+    {
+        return $this->accessRepository->getMtnAccessToken();
+    }
 }

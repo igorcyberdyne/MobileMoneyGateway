@@ -6,7 +6,7 @@ use DateTime;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Exception;
 
-abstract class AbstractMtnAccessRepository extends AbstractFileStoreRepository
+abstract class AbstractInMemoryMtnAccessRepository extends AbstractFileStoreRepository
 {
     /**
      * @throws Exception
@@ -38,7 +38,7 @@ abstract class AbstractMtnAccessRepository extends AbstractFileStoreRepository
 
         try {
             $isExpired = strtotime(date("Y-m-d H:i:s")) >= strtotime((new DateTime($this->getStore()["mtnAccessToken"]["expiredAt"]))->modify("-10 minutes")->format("Y-m-d H:i:s"));
-        } catch (Exception $e) {
+        } catch (Exception) {
             $isExpired = true;
         }
 
