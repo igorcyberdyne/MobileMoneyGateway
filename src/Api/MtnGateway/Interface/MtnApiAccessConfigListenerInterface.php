@@ -6,7 +6,7 @@ use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 
 interface MtnApiAccessConfigListenerInterface
 {
-    public function onApiUserCreated(): void;
+    public function onApiUserCreated(string $apiUser): void;
 
     public function onApiKeyCreated(string $apiKey): void;
 

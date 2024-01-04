@@ -89,6 +89,42 @@ final class ExceptionMessage extends AbstractArrayKeyValue
                 "key" => DisbursementException::DISBURSE_BAD_NUMBER,
                 "value" => "Bad number given",
             ],
+            [
+                "key" => MtnAuthenticationProductException::PRODUCT_MUST_BE_CONFIGURED,
+                "value" => "Mtn product must be configured",
+            ],
+            [
+                "key" => MtnAuthenticationProductException::API_KEY_CANNOT_BE_EMPTY,
+                "value" => "Mtn apiKey cannot be empty",
+            ],
+            [
+                "key" => MtnAuthenticationProductException::API_USER_CANNOT_BE_EMPTY,
+                "value" => "Mtn apiUser cannot be empty",
+            ],
+            [
+                "key" => EnvironmentException::MTN_ENV_NOT_CONFIGURED,
+                "value" => "Mtn environment not configured",
+            ],
+            [
+                "key" => MtnAccessKeyException::CANNOT_CREATE_API_KEY_IN_PRODUCTION,
+                "value" => "Api key not be configured in production",
+            ],
+            [
+                "key" => MtnAccessKeyException::CANNOT_PERFORM_REQUEST_TO_RETRIEVE_API_USER,
+                "value" => "Error when retrieving api user",
+            ],
+            [
+                "key" => MtnAccessKeyException::CANNOT_PERFORM_REQUEST_TO_CREATE_API_USER,
+                "value" => "Error when creating api user",
+            ],
+            [
+                "key" => MtnAccessKeyException::CANNOT_PERFORM_REQUEST_TO_CREATE_API_KEY,
+                "value" => "Error when creating api key",
+            ],
+            [
+                "key" => FactoryException::CANNOT_CREATE_OBJECT_WITH_TYPE,
+                "value" => "Gateway with type [type] does not exist",
+            ],
         ];
     }
 }

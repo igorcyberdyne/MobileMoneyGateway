@@ -6,26 +6,34 @@ class MtnAuthenticationProduct
 {
 
     /**
-     * @param string $apiUser
      * @param string $subscriptionKeyOne
      * @param string $subscriptionKeyTwo
+     * @param string|null $apiUser
      * @param string|null $apiKey
      */
     public function __construct(
-        private readonly string $apiUser,
         private readonly string $subscriptionKeyOne,
         private readonly string $subscriptionKeyTwo,
+        private ?string         $apiUser = null,
         private ?string         $apiKey = null
     )
     {
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getApiUser(): string
+    public function getApiUser(): ?string
     {
         return $this->apiUser;
+    }
+
+    /**
+     * @param string|null $apiUser
+     */
+    public function setApiUser(?string $apiUser): void
+    {
+        $this->apiUser = $apiUser;
     }
 
     /**

@@ -5,7 +5,11 @@ namespace Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement;
 use Ekolotech\MoMoGateway\Api\Dependencies\HttpClient;
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\RequestMethod;
 use Ekolotech\MoMoGateway\Api\MtnGateway\AbstractMtnApiGateway;
@@ -71,7 +75,11 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
 
 
     /**
-     * @throws Exception
+     * @param DisburseRequestBody $disburseRequestBody
+     * @return bool
+     * @throws DisbursementException
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
      */
     public function disburse(DisburseRequestBody $disburseRequestBody): bool
     {
@@ -136,7 +144,11 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     }
 
     /**
-     * @throws Exception
+     * @param string $reference
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function disburseReference(string $reference): array
     {
@@ -144,12 +156,16 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     }
 
     /**
-     * @throws Exception
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
+     * @throws BalanceException
      */
     public function balance(): array
     {
         return $this->accountBalance();
     }
+
     /**
      * @param string $number
      * @return bool
@@ -164,6 +180,8 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @param string $number
      * @return array
      * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array
     {

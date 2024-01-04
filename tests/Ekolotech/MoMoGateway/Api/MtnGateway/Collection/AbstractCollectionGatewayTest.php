@@ -7,13 +7,22 @@ use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
 
-class TestCollectionGateway extends AbstractCollectionGateway
+class TestCollectionGateway extends AbstractCollectionGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
 {
+    public string $apiUserCreated = "";
+    public function getBaseApiUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
     public function getProviderCallbackUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -33,6 +42,22 @@ class TestCollectionGateway extends AbstractCollectionGateway
     {
         return Currency::EUR;
     }
+
+    public function onApiUserCreated(string $apiUser): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+        $this->apiUserCreated = $apiUser;
+    }
+
+    public function onApiKeyCreated(string $apiKey): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+    }
+
+    public function onTokenCreated(MtnAccessToken $mtnAccessToken): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+    }
 }
 
 
@@ -43,7 +68,7 @@ class TestCollectionGateway extends AbstractCollectionGateway
  */
 class AbstractCollectionGatewayTest extends TestCase
 {
-    private AbstractCollectionGateway $collectionGateway;
+    private AbstractCollectionGateway|TestCollectionGateway $collectionGateway;
     private string $apiUser;
     private static MtnAuthenticationProduct $authenticationProduct;
 
@@ -52,15 +77,14 @@ class AbstractCollectionGatewayTest extends TestCase
         parent::setUp();
 
         static::$authenticationProduct = new MtnAuthenticationProduct(
-            "65a9c425-1d54-4a7b-b7d4-9c756f681920",
             "0672b80420244d9f9d39330b0811e1cd",
             "d57e01802dd3456fbfc6c2998dca2426",
         );
     }
 
-    private function givenApiUser(): string
+    private function givenApiUser(bool $empty = false): string
     {
-        $this->apiUser = AbstractTools::uuid();
+        $this->apiUser = $empty ? "" : AbstractTools::uuid();
 
         return $this->apiUser;
     }
@@ -71,9 +95,9 @@ class AbstractCollectionGatewayTest extends TestCase
     ): MtnAuthenticationProduct
     {
         return new MtnAuthenticationProduct(
-            $apiUser ?? static::$authenticationProduct->getApiUser(),
             static::$authenticationProduct->getSubscriptionKeyOne(),
             static::$authenticationProduct->getSubscriptionKeyTwo(),
+                $apiUser ?? static::$authenticationProduct->getApiUser(),
             $apiKey
         );
     }
@@ -223,6 +247,78 @@ class AbstractCollectionGatewayTest extends TestCase
             "https://sandbox.momodeveloper.mtn.com",
             $this->givenCollectGateway($auth)->collectionGateway->getBaseApiUrl()
         );
+    }
+
+    public function listenerDataProvider(): array
+    {
+        return [
+            "Listener for method onApiUserCreated" => [
+                "methodName" => "onApiUserCreated",
+            ],
+            "Listener for method onApiKeyCreated" => [
+                "methodName" => "onApiKeyCreated",
+            ],
+            "Listener for method onTokenCreated" => [
+                "methodName" => "onTokenCreated",
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider listenerDataProvider
+     * @throws Exception
+     */
+    public function test_listener_on_method_THEN_methods_listen_is_called($methodName)
+    {
+        $apiKey = null;
+        if ($methodName == "onTokenCreated") {
+            $apiKey = $this->createApiKeyAssociateToApiUser();
+            $apiUser = $this->apiUser;
+        } else {
+            $apiUser = $this->givenApiUser();
+        }
+
+        $auth = $this->givenAuthenticationProduct(
+            apiUser: $apiUser,
+            apiKey: $apiKey
+        );
+
+        $mock = $this->getMockBuilder(TestCollectionGateway::class)
+            ->setConstructorArgs([$auth])
+            ->onlyMethods([$methodName])
+            ->getMock()
+        ;
+        $mock->expects(self::exactly(1))->method($methodName);
+
+        if ($methodName !== "onTokenCreated") {
+            $mock->createApiUser();
+            $mock->createApiKey();
+
+            return;
+        }
+
+        $mock->createToken();
+    }
+
+
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function test_createApiUser_WITHOUT_given_apiUserValue(): void
+    {
+        $auth = $this->givenAuthenticationProduct(apiUser: "");
+        $this->assertEmpty($auth->getApiUser());
+
+        $auth = $this
+            ->givenCollectGateway($auth)
+            ->collectionGateway
+            ->getAuthenticationProduct()
+        ;
+
+        $this->assertNotEmpty($auth->getApiUser());
+        $this->assertEquals($auth->getApiUser(), $this->collectionGateway->apiUserCreated);
     }
 
     /**

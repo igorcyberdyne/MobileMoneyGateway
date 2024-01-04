@@ -5,18 +5,24 @@ namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 use Ekolotech\MoMoGateway\Api\Dependencies\HttpClient;
 use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\RequestMethod;
 use Ekolotech\MoMoGateway\Api\MtnGateway\AbstractMtnApiGateway;
-use Exception;
 use Throwable;
 
 abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implements CollectionGatewayInterface
 {
     /**
+     * @param CollectRequestBody $collectRequestBody
+     * @return bool
      * @throws CollectionException
-     * @throws Exception
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
      */
     public function collect(CollectRequestBody $collectRequestBody): bool
     {
@@ -100,15 +106,22 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
     }
 
     /**
-     * @throws Exception
+     * @param string $reference
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function collectReference(string $reference): array
     {
         return $this->transactionReference($reference);
     }
 
+
     /**
-     * @throws Exception
+     * @throws TokenCreationException
+     * @throws BalanceException
+     * @throws MtnAccessKeyException
      */
     public function balance(): array
     {
@@ -129,6 +142,8 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @param string $number
      * @return array
      * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array
     {

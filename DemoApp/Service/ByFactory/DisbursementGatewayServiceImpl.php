@@ -16,6 +16,11 @@ final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironment
     {
     }
 
+    public function getBaseApiUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
     public function getProviderCallbackUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -36,9 +41,9 @@ final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironment
         return Currency::EUR;
     }
 
-    public function onApiUserCreated(): void
+    public function onApiUserCreated(string $apiUser): void
     {
-        // TODO: Implement onApiUserCreated() method.
+        $this->accessRepository->saveApiUser($apiUser);
     }
 
     public function onApiKeyCreated(string $apiKey): void
@@ -54,9 +59,9 @@ final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironment
     public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
     {
         return new MtnAuthenticationProduct(
-            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
             "ac4f92d8be3e4801bd346d7a986cff52",
             "a882e46cedd948b1abe31c513e4b822b",
+            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
             $this->accessRepository->getApiKey()
         );
     }

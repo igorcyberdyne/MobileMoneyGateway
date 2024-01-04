@@ -12,7 +12,7 @@ use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Api\Factory\ApiGatewayFactory;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
-use Ekolotech\MoMoGateway\Api\Model\GatewayProductType;
+use Ekolotech\MoMoGateway\Api\Model\GatewayProductTypeEnum;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
@@ -29,11 +29,11 @@ final class TransactionService
     {
         if ($useFactory) {
             $this->collectionGateway = ApiGatewayFactory::loadMtnGateway(
-                GatewayProductType::MtnCollectionGateway,
+                GatewayProductTypeEnum::MtnCollectionGateway->name,
                 new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository())
             );
             $this->disbursementGateway = ApiGatewayFactory::loadMtnGateway(
-                GatewayProductType::MtnDisbursementGateway,
+                GatewayProductTypeEnum::MtnDisbursementGateway->name,
                 new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository())
             );
 

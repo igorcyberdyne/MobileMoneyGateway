@@ -7,12 +7,19 @@ use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class TestDisbursementGateway extends AbstractDisbursementGateway
+class TestDisbursementGateway extends AbstractDisbursementGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
 {
+    public function getBaseApiUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
     public function getProviderCallbackUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -32,6 +39,21 @@ class TestDisbursementGateway extends AbstractDisbursementGateway
     {
         return Currency::EUR;
     }
+
+    public function onApiUserCreated(string $apiUser): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+    }
+
+    public function onApiKeyCreated(string $apiKey): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+    }
+
+    public function onTokenCreated(MtnAccessToken $mtnAccessToken): void
+    {
+        // TODO: Implement onApiUserCreated() method.
+    }
 }
 class AbstractDisbursementGatewayTest extends TestCase
 {
@@ -45,9 +67,9 @@ class AbstractDisbursementGatewayTest extends TestCase
         parent::setUp();
 
         static::$authenticationProduct = new MtnAuthenticationProduct(
-            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
             "ac4f92d8be3e4801bd346d7a986cff52",
             "a882e46cedd948b1abe31c513e4b822b",
+            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517"
         );
     }
 
@@ -64,9 +86,9 @@ class AbstractDisbursementGatewayTest extends TestCase
     ): MtnAuthenticationProduct
     {
         return new MtnAuthenticationProduct(
-            $apiUser ?? static::$authenticationProduct->getApiUser(),
             static::$authenticationProduct->getSubscriptionKeyOne(),
             static::$authenticationProduct->getSubscriptionKeyTwo(),
+                $apiUser ?? static::$authenticationProduct->getApiUser(),
             $apiKey
         );
     }
@@ -214,6 +236,57 @@ class AbstractDisbursementGatewayTest extends TestCase
             "https://sandbox.momodeveloper.mtn.com",
             $this->givenDisburseGateway($auth)->disbursementGateway->getBaseApiUrl()
         );
+    }
+
+    public function listenerDataProvider(): array
+    {
+        return [
+            "Listener for method onApiUserCreated" => [
+                "methodName" => "onApiUserCreated",
+            ],
+            "Listener for method onApiKeyCreated" => [
+                "methodName" => "onApiKeyCreated",
+            ],
+            "Listener for method onTokenCreated" => [
+                "methodName" => "onTokenCreated",
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider listenerDataProvider
+     * @throws Exception
+     */
+    public function test_listener_on_method_THEN_methods_listen_is_called($methodName)
+    {
+        $apiKey = null;
+        if ($methodName == "onTokenCreated") {
+            $apiKey = $this->createApiKeyAssociateToApiUser();
+            $apiUser = $this->apiUser;
+        } else {
+            $apiUser = $this->givenApiUser();
+        }
+
+        $auth = $this->givenAuthenticationProduct(
+            apiUser: $apiUser,
+            apiKey: $apiKey
+        );
+
+        $mock = $this->getMockBuilder(TestDisbursementGateway::class)
+            ->setConstructorArgs([$auth])
+            ->onlyMethods([$methodName])
+            ->getMock()
+        ;
+        $mock->expects(self::exactly(1))->method($methodName);
+
+        if ($methodName !== "onTokenCreated") {
+            $mock->createApiUser();
+            $mock->createApiKey();
+
+            return;
+        }
+
+        $mock->createToken();
     }
 
     /**

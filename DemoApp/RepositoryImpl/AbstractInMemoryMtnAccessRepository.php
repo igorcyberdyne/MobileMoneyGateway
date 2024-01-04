@@ -8,6 +8,21 @@ use Exception;
 
 abstract class AbstractInMemoryMtnAccessRepository extends AbstractFileStoreRepository
 {
+    public function getApiUser(): ?string
+    {
+        return $this->getStore()["apiUser"] ?? null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function saveApiUser(string $apiUser): static
+    {
+        $this->setStore(["apiUser" => $apiUser]);
+
+        return $this;
+    }
+
     /**
      * @throws Exception
      */

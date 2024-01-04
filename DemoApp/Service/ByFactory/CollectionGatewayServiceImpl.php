@@ -16,6 +16,11 @@ final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentCo
     {
     }
 
+    public function getBaseApiUrl(): string
+    {
+        return "https://sandbox.momodeveloper.mtn.com";
+    }
+
     public function getProviderCallbackUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -36,9 +41,9 @@ final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentCo
         return Currency::EUR;
     }
 
-    public function onApiUserCreated(): void
+    public function onApiUserCreated(string $apiUser): void
     {
-        // TODO: Implement onApiUserCreated() method.
+        $this->accessRepository->saveApiUser($apiUser);
     }
 
     public function onApiKeyCreated(string $apiKey): void
@@ -54,9 +59,9 @@ final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentCo
     public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
     {
         return new MtnAuthenticationProduct(
-            "65a9c425-1d54-4a7b-b7d4-9c756f681920",
             "0672b80420244d9f9d39330b0811e1cd",
             "d57e01802dd3456fbfc6c2998dca2426",
+            $this->accessRepository->getApiUser(),
             $this->accessRepository->getApiKey()
         );
     }
