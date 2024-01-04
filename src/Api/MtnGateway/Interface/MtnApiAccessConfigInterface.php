@@ -14,12 +14,4 @@ interface MtnApiAccessConfigInterface extends ApiGatewayInterface
     public function createApiKey(): string;
 
     public function createToken(): MtnAccessToken;
-
-    /**
-     * Help method to create apiUser, apiKey and token
-     * TODO
-     * @return array
-     */
-    public function createAccess(): array;
-
 }

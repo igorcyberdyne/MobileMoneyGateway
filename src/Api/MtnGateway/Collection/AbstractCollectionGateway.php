@@ -8,6 +8,7 @@ use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
 use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
@@ -23,6 +24,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @throws CollectionException
      * @throws MtnAccessKeyException
      * @throws TokenCreationException
+     * @throws RefreshAccessException
      */
     public function collect(CollectRequestBody $collectRequestBody): bool
     {
@@ -111,6 +113,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
+     * @throws RefreshAccessException
      */
     public function collectReference(string $reference): array
     {
@@ -122,6 +125,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @throws TokenCreationException
      * @throws BalanceException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      */
     public function balance(): array
     {
@@ -132,6 +136,9 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @param string $number
      * @return bool
      * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function isAccountIsActive(string $number): bool
     {
@@ -143,6 +150,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @return array
      * @throws AccountHolderException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array

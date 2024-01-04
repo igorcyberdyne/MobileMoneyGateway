@@ -16,18 +16,48 @@ use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 abstract class ApiGatewayFactory
 {
     /**
-     * @param string $gatewayProductType
+     * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
+     * @return CollectionGatewayInterface
+     * @throws FactoryException
+     */
+    public static function loadMtnCollectionGateway(
+        MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
+    ) : CollectionGatewayInterface
+    {
+        return self::loadMtnGateway(
+            GatewayProductTypeEnum::MtnCollectionGateway,
+            $accessAndEnvironmentConfig
+        );
+    }
+    /**
+     * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
+     * @return DisbursementGatewayInterface
+     * @throws FactoryException
+     */
+    public static function loadMtnDisbursementGateway(
+        MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
+    ) : DisbursementGatewayInterface
+    {
+        return self::loadMtnGateway(
+            GatewayProductTypeEnum::MtnDisbursementGateway,
+            $accessAndEnvironmentConfig
+        );
+    }
+
+
+    /**
+     * @param GatewayProductTypeEnum $gatewayProductTypeEnum
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
      * @return CollectionGatewayInterface|DisbursementGatewayInterface
      * @throws FactoryException
      */
-    public static function loadMtnGateway(
-        string $gatewayProductType,
+    private static function loadMtnGateway(
+        GatewayProductTypeEnum $gatewayProductTypeEnum,
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
     ) : CollectionGatewayInterface|DisbursementGatewayInterface
     {
-        return match ($gatewayProductType) {
-            GatewayProductTypeEnum::MtnCollectionGateway->name => new class ($accessAndEnvironmentConfig) extends AbstractCollectionGateway
+        return match ($gatewayProductTypeEnum) {
+            GatewayProductTypeEnum::MtnCollectionGateway => new class ($accessAndEnvironmentConfig) extends AbstractCollectionGateway
                 implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
             {
                 public function __construct(private readonly MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig)
@@ -78,7 +108,7 @@ abstract class ApiGatewayFactory
                     $this->accessAndEnvironmentConfig->onTokenCreated($mtnAccessToken);
                 }
             },
-            GatewayProductTypeEnum::MtnDisbursementGateway->name => new class ($accessAndEnvironmentConfig) extends AbstractDisbursementGateway
+            GatewayProductTypeEnum::MtnDisbursementGateway => new class ($accessAndEnvironmentConfig) extends AbstractDisbursementGateway
                 implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
             {
                 public function __construct(private readonly MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig)
@@ -129,7 +159,7 @@ abstract class ApiGatewayFactory
                     $this->accessAndEnvironmentConfig->onTokenCreated($mtnAccessToken);
                 }
             },
-            default => throw FactoryException::load(FactoryException::CANNOT_CREATE_OBJECT_WITH_TYPE, ["type" => "[$gatewayProductType]"]),
+            default => throw FactoryException::load(FactoryException::CANNOT_CREATE_OBJECT_WITH_TYPE, ["type" => "[$gatewayProductTypeEnum->name]"]),
         };
     }
 }

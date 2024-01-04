@@ -3,8 +3,15 @@
 namespace Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement;
 
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
+use Ekolotech\MoMoGateway\Api\Exception\EnvironmentException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAuthenticationProductException;
+use Ekolotech\MoMoGateway\Api\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
@@ -80,6 +87,11 @@ class AbstractDisbursementGatewayTest extends TestCase
         return $this->apiUser;
     }
 
+    /**
+     * @param string|null $apiUser
+     * @param string|null $apiKey
+     * @return MtnAuthenticationProduct
+     */
     private function givenAuthenticationProduct(
         ?string $apiUser = null,
         ?string $apiKey = null
@@ -94,7 +106,10 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @param MtnAuthenticationProduct $auth
+     * @return $this
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     private function givenDisburseGateway(MtnAuthenticationProduct $auth): static
     {
@@ -106,7 +121,9 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @return void
-     * @throws Exception
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
+     * @throws MtnAccessKeyException
      */
     public function createApiUser(): void
     {
@@ -137,7 +154,9 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @return string
-     * @throws Exception
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function createApiKeyAssociateToApiUser(): string
     {
@@ -158,8 +177,12 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return $this
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      * @throws TokenCreationException
-     * @throws Exception
+     * @throws RefreshAccessException
      */
     public function createToken(): static
     {
@@ -213,7 +236,11 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @dataProvider urlDataProvider
-     * @throws Exception
+     * @param string $method
+     * @param $data
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     public function test_url_for_local_environment(string $method, $data)
     {
@@ -223,7 +250,9 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     public function test_baseUrl_and_productType()
     {
@@ -255,7 +284,13 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @dataProvider listenerDataProvider
-     * @throws Exception
+     * @param $methodName
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_listener_on_method_THEN_methods_listen_is_called($methodName)
     {
@@ -290,7 +325,10 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiUser_and_get_THEN_created()
     {
@@ -298,7 +336,10 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiKey_WHITHOUT_associate_to_apiUser_THEN_failed()
     {
@@ -315,7 +356,10 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiKey_WHITH_associate_to_apiUser_THEN_create()
     {
@@ -323,8 +367,12 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_create_token_THEN_failed()
     {
@@ -341,8 +389,12 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_create_token_THEN_created()
     {
@@ -350,8 +402,13 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return string
+     * @throws DisbursementException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_disburse_THEN_success()
     {
@@ -369,8 +426,13 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws DisbursementException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_disburse_GIVEN_zero_as_amount_THEN_expected_exception()
     {
@@ -398,8 +460,14 @@ class AbstractDisbursementGatewayTest extends TestCase
 
     /**
      * @dataProvider badNumberDataProvider
+     * @param string $number
+     * @return void
+     * @throws DisbursementException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_disburse_GIVEN_bad_number_THEN_expected_exception(string $number)
     {
@@ -416,7 +484,14 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws DisbursementException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function test_disburse_reference()
     {
@@ -439,7 +514,13 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws BalanceException
      */
     public function test_balance()
     {
@@ -452,7 +533,13 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws AccountHolderException
      */
     public function test_accountHolderActive()
     {
@@ -465,7 +552,13 @@ class AbstractDisbursementGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws AccountHolderException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_accountHolderBasicUserInfo()
     {

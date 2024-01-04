@@ -3,8 +3,15 @@
 namespace Ekolotech\MoMoGateway\Api\MtnGateway\Collection;
 
 use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\AccountHolderException;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Api\Exception\EnvironmentException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAuthenticationProductException;
+use Ekolotech\MoMoGateway\Api\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Api\Model\Currency;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
@@ -82,13 +89,21 @@ class AbstractCollectionGatewayTest extends TestCase
         );
     }
 
-    private function givenApiUser(bool $empty = false): string
+    /**
+     * @return string
+     */
+    private function generateApiUser(): string
     {
-        $this->apiUser = $empty ? "" : AbstractTools::uuid();
+        $this->apiUser = AbstractTools::uuid();
 
         return $this->apiUser;
     }
 
+    /**
+     * @param string|null $apiUser
+     * @param string|null $apiKey
+     * @return MtnAuthenticationProduct
+     */
     private function givenAuthenticationProduct(
         ?string $apiUser = null,
         ?string $apiKey = null
@@ -103,7 +118,10 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @param MtnAuthenticationProduct $auth
+     * @return $this
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     private function givenCollectGateway(MtnAuthenticationProduct $auth): static
     {
@@ -115,12 +133,14 @@ class AbstractCollectionGatewayTest extends TestCase
 
     /**
      * @return void
-     * @throws Exception
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
-    public function createApiUser(): void
+    public function givenApiUser(): void
     {
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->givenApiUser(),
+            apiUser: $this->generateApiUser(),
             apiKey: "apiKey"
         );
 
@@ -146,11 +166,13 @@ class AbstractCollectionGatewayTest extends TestCase
 
     /**
      * @return string
-     * @throws Exception
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
-    public function createApiKeyAssociateToApiUser(): string
+    public function givenApiKey(): string
     {
-        $this->createApiUser();
+        $this->givenApiUser();
 
         $auth = $this->givenAuthenticationProduct(
             apiUser: $this->apiUser,
@@ -167,13 +189,16 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @return AbstractCollectionGatewayTest
+     * @return $this
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function createToken(): static
     {
-        $apiKey = $this->createApiKeyAssociateToApiUser();
+        $apiKey = $this->givenApiKey();
 
         $auth = $this->givenAuthenticationProduct(
             apiUser: $this->apiUser,
@@ -224,7 +249,11 @@ class AbstractCollectionGatewayTest extends TestCase
 
     /**
      * @dataProvider urlDataProvider
-     * @throws Exception
+     * @param string $method
+     * @param $data
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     public function test_url_for_local_environment(string $method, $data)
     {
@@ -234,12 +263,14 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     public function test_baseUrl_and_productType()
     {
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->givenApiUser(),
+            apiUser: $this->generateApiUser(),
             apiKey: "apiKey"
         );
 
@@ -266,16 +297,22 @@ class AbstractCollectionGatewayTest extends TestCase
 
     /**
      * @dataProvider listenerDataProvider
-     * @throws Exception
+     * @param $methodName
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_listener_on_method_THEN_methods_listen_is_called($methodName)
     {
         $apiKey = null;
         if ($methodName == "onTokenCreated") {
-            $apiKey = $this->createApiKeyAssociateToApiUser();
+            $apiKey = $this->givenApiKey();
             $apiUser = $this->apiUser;
         } else {
-            $apiUser = $this->givenApiUser();
+            $apiUser = $this->generateApiUser();
         }
 
         $auth = $this->givenAuthenticationProduct(
@@ -301,10 +338,10 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
 
-
     /**
      * @return void
-     * @throws Exception
+     * @throws EnvironmentException
+     * @throws MtnAuthenticationProductException
      */
     public function test_createApiUser_WITHOUT_given_apiUserValue(): void
     {
@@ -322,20 +359,26 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiUser_and_get_THEN_created()
     {
-        $this->createApiUser();
+        $this->givenApiUser();
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiKey_WHITHOUT_associate_to_apiUser_THEN_failed()
     {
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->givenApiUser(),
+            apiUser: $this->generateApiUser(),
             apiKey: "apiKey"
         );
 
@@ -347,21 +390,28 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
      */
     public function test_create_apiKey_WHITH_associate_to_apiUser_THEN_create()
     {
-        $this->createApiKeyAssociateToApiUser();
+        $this->givenApiKey();
     }
 
     /**
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_create_token_THEN_failed()
     {
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->givenApiUser(),
+            apiUser: $this->generateApiUser(),
             apiKey: "apiKey"
         );
 
@@ -373,8 +423,12 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
      */
     public function test_create_token_THEN_created()
     {
@@ -382,7 +436,12 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
+     * @return string
      * @throws CollectionException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function test_collect_THEN_success()
@@ -401,7 +460,12 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws CollectionException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function test_collect_GIVEN_zero_as_amount_THEN_expected_exception()
@@ -430,7 +494,13 @@ class AbstractCollectionGatewayTest extends TestCase
 
     /**
      * @dataProvider badNumberDataProvider
+     * @param string $number
+     * @return void
      * @throws CollectionException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function test_collect_GIVEN_bad_number_THEN_expected_exception(string $number)
@@ -449,7 +519,14 @@ class AbstractCollectionGatewayTest extends TestCase
 
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws CollectionException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function test_collect_reference()
     {
@@ -472,7 +549,13 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws BalanceException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_balance()
     {
@@ -485,7 +568,13 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws AccountHolderException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_accountHolderActive()
     {
@@ -498,7 +587,13 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws AccountHolderException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function test_accountHolderBasicUserInfo()
     {

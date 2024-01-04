@@ -125,6 +125,10 @@ final class ExceptionMessage extends AbstractArrayKeyValue
                 "key" => FactoryException::CANNOT_CREATE_OBJECT_WITH_TYPE,
                 "value" => "Gateway with type [type] does not exist",
             ],
+            [
+                "key" => RefreshAccessException::REFRESH_ACCESS_ERROR,
+                "value" => "Error when refreshing access keys. See code: [[code]]; message: [[message]]",
+            ],
         ];
     }
 }

@@ -9,6 +9,7 @@ use Ekolotech\MoMoGateway\Api\Exception\EnvironmentException;
 use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Api\Exception\MtnAuthenticationProductException;
 use Ekolotech\MoMoGateway\Api\Exception\ProductTokenSessionException;
+use Ekolotech\MoMoGateway\Api\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
@@ -26,8 +27,10 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     const STATUS_SUCCESS = 200;
     const STATUS_CREATED = 201;
     const STATUS_ACCEPTED = 202;
+    const STATUS_UNAUTHORIZED = 401;
     const STATUS_CONFLICT = 409;
     const MSISDN_ACCOUNT_TYPE = "MSISDN";
+    private bool $isCreateAccessAlreadyUsed = false;
 
 
     /**
@@ -178,16 +181,14 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
      */
     public function createApiUser(): bool
     {
-        $headers = [
-            "Content-type" => "application/json",
-            "X-Reference-Id" => $this->authenticationProduct->getApiUser(),
-            'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne()
-        ];
         try {
-            $body = '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}';
             $client = HttpClient::create([
-                "headers" => $headers,
-                "body" => $body
+                "headers" => [
+                    "Content-type" => "application/json",
+                    "X-Reference-Id" => $this->authenticationProduct->getApiUser(),
+                    'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne()
+                ],
+                "body" => '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}'
             ]);
 
             $response = $client->request(RequestMethod::POST, $this->getCreateApiUserUrl());
@@ -242,7 +243,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     public function createApiKey(): string
     {
         try {
-            $body = '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}';
+            //$body = '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}';
             $body = "";
 
             $client = HttpClient::create([
@@ -265,12 +266,11 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
                 throw new Exception("Server error when creating apiKey");
             }
 
-            // TODO dispatch event apiKey created
             if ($this instanceof MtnApiAccessConfigListenerInterface) {
                 try {
                     $this->onApiKeyCreated($apiKey);
-                } catch (Exception $exception) {
-                    // TODO something
+                } catch (Exception) {
+
                 }
             }
 
@@ -283,6 +283,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     /**
      * @throws TokenCreationException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      */
     public function createToken(): MtnAccessToken
     {
@@ -300,7 +301,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne()
         ];
 
-        $body = '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}';
+        //$body = '{"providerCallbackHost": "' . $this->getProviderCallbackHost() . '"}';
         $body = "";
 
         try {
@@ -324,25 +325,66 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             if ($this instanceof MtnApiAccessConfigListenerInterface) {
                 try {
                     $this->onTokenCreated($mtnAccessToken);
-                } catch (Exception $exception) {
-                    // TODO something
+                } catch (Exception) {
+
                 }
             }
 
             return $mtnAccessToken;
         } catch (Throwable $t) {
+            $this->createAccess($t);
+
             throw TokenCreationException::load(TokenCreationException::TOKEN_CREATION_ERROR, previous: $t);
         }
     }
 
-    public function createAccess(): array
+    /**
+     * Help method to create apiUser, apiKey and token
+     * @param Throwable $originError
+     * @return void
+     * @throws RefreshAccessException
+     */
+    private function createAccess(Throwable $originError): void
     {
-        return [];
+        if (self::STATUS_UNAUTHORIZED == $originError->getCode() && $this->isCreateAccessAlreadyUsed) {
+            return;
+        }
+
+        $this->isCreateAccessAlreadyUsed = true;
+
+        if ($this instanceof MtnApiEnvironmentConfigInterface && $this->isProd()) {
+            return;
+        }
+
+        $oldApiUser = $this->authenticationProduct->getApiUser();
+
+        try {
+            $this->authenticationProduct->setApiUser(AbstractTools::uuid());
+            $this->createApiUser();
+
+            $this->authenticationProduct->setApiKey($this->createApiKey());
+
+            $this->createToken();
+        } catch (Throwable $t) {
+            if ($t->getCode() === MtnAccessKeyException::CANNOT_PERFORM_REQUEST_TO_CREATE_API_USER) {
+                $this->authenticationProduct->setApiUser($oldApiUser);
+            }
+
+            throw RefreshAccessException::load(
+                RefreshAccessException::REFRESH_ACCESS_ERROR,
+                [
+                    "code" => $originError->getCode(),
+                    "message" => $originError->getMessage(),
+                ],
+                $t
+            );
+        }
     }
 
     /**
      * @throws TokenCreationException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      */
     private function getToken(): string
     {
@@ -361,6 +403,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
      * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
+     * @throws RefreshAccessException
      */
     protected function transactionReference(string $reference): array
     {
@@ -387,8 +430,12 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     }
 
     /**
+     * @param string $phoneNumber
+     * @return bool
      * @throws AccountHolderException
-     * @throws Exception
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     protected function accountHolderActive(string $phoneNumber): bool
     {
@@ -427,7 +474,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
      * @return array
      * @throws AccountHolderException
      * @throws MtnAccessKeyException
-     * @throws TokenCreationException
+     * @throws TokenCreationException|RefreshAccessException
      */
     protected function accountHolderBasicUserInfo(string $phoneNumber): array
     {
@@ -462,6 +509,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
      * @throws TokenCreationException
      * @throws BalanceException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      */
     protected function accountBalance(): array
     {
@@ -491,6 +539,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     /**
      * @throws TokenCreationException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      */
     protected function buildBearerToken(): string
     {

@@ -10,9 +10,18 @@ use DemoApp\Service\ByInherit\CollectionGatewayService;
 use DemoApp\Service\ByInherit\DisbursementGatewayService;
 use Ekolotech\MoMoGateway\Api\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Api\Dto\DisburseRequestBody;
+use Ekolotech\MoMoGateway\Api\Exception\BalanceException;
+use Ekolotech\MoMoGateway\Api\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Api\Exception\DisbursementException;
+use Ekolotech\MoMoGateway\Api\Exception\EnvironmentException;
+use Ekolotech\MoMoGateway\Api\Exception\FactoryException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Api\Exception\MtnAuthenticationProductException;
+use Ekolotech\MoMoGateway\Api\Exception\RefreshAccessException;
+use Ekolotech\MoMoGateway\Api\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Api\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Api\Factory\ApiGatewayFactory;
 use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
-use Ekolotech\MoMoGateway\Api\Model\GatewayProductTypeEnum;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
@@ -23,17 +32,18 @@ final class TransactionService
     private DisbursementGatewayInterface $disbursementGateway;
 
     /**
-     * @throws Exception
+     * @param bool $useFactory
+     * @throws EnvironmentException
+     * @throws FactoryException
+     * @throws MtnAuthenticationProductException
      */
     public function __construct(bool $useFactory = true)
     {
         if ($useFactory) {
-            $this->collectionGateway = ApiGatewayFactory::loadMtnGateway(
-                GatewayProductTypeEnum::MtnCollectionGateway->name,
+            $this->collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
                 new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository())
             );
-            $this->disbursementGateway = ApiGatewayFactory::loadMtnGateway(
-                GatewayProductTypeEnum::MtnDisbursementGateway->name,
+            $this->disbursementGateway = ApiGatewayFactory::loadMtnDisbursementGateway(
                 new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository())
             );
 
@@ -45,6 +55,13 @@ final class TransactionService
     }
 
     /**
+     * @param int $amount
+     * @param string $number
+     * @return string
+     * @throws CollectionException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      * @throws Exception
      */
     public function executeCollect(int $amount, string $number): string
@@ -65,7 +82,12 @@ final class TransactionService
     }
 
     /**
-     * @throws Exception
+     * @param string $reference
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function checkCollect(string $reference): array
     {
@@ -73,7 +95,11 @@ final class TransactionService
     }
 
     /**
-     * @throws Exception
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws BalanceException
      */
     public function collectBalance(): array
     {
@@ -81,6 +107,12 @@ final class TransactionService
     }
 
     /**
+     * @param int $amount
+     * @param string $number
+     * @return string
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
+     * @throws DisbursementException
      * @throws Exception
      */
     public function executeDisburse(int $amount, string $number): string
@@ -101,7 +133,11 @@ final class TransactionService
     }
 
     /**
-     * @throws Exception
+     * @param string $reference
+     * @return array
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function checkDisburse(string $reference): array
     {
@@ -109,7 +145,10 @@ final class TransactionService
     }
 
     /**
-     * @throws Exception
+     * @return array
+     * @throws BalanceException
+     * @throws MtnAccessKeyException
+     * @throws TokenCreationException
      */
     public function disburseBalance(): array
     {

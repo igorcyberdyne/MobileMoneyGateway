@@ -3,13 +3,11 @@
 namespace Ekolotech\MoMoGateway\Api\Factory;
 
 use Ekolotech\MoMoGateway\Api\Model\Currency;
-use Ekolotech\MoMoGateway\Api\Model\GatewayProductTypeEnum;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 class MtnApiAccessAndEnvironmentConfigService implements MtnApiAccessAndEnvironmentConfigInterface
@@ -75,11 +73,11 @@ class ApiGatewayFactoryTest extends TestCase
     {
         return [
             "Mtn collection" => [
-                "gatewayType" => GatewayProductTypeEnum::MtnCollectionGateway->name,
+                "methodName" => "loadMtnCollectionGateway",
                 "instanceExpectedOf" => CollectionGatewayInterface::class,
             ],
             "Mtn disbursement" => [
-                "gatewayType" => GatewayProductTypeEnum::MtnDisbursementGateway->name,
+                "methodName" => "loadMtnDisbursementGateway",
                 "instanceExpectedOf" => DisbursementGatewayInterface::class,
             ],
         ];
@@ -87,19 +85,19 @@ class ApiGatewayFactoryTest extends TestCase
 
     /**
      * @dataProvider gatewayProductTypeDataProvider
-     * @param string $gatewayType
+     * @param string $methodName
      * @param string $instanceExpectedOf
      * @return void
-     * @throws Exception
      */
-    public function test_load_MtnGateway_product_THEN_success(string $gatewayType, string $instanceExpectedOf)
+    public function test_load_MtnGateway_product_THEN_success(
+        string $methodName,
+        string $instanceExpectedOf
+    )
     {
-        $instance = ApiGatewayFactory::loadMtnGateway(
-            $gatewayType,
+        $instance = ApiGatewayFactory::$methodName(
             new MtnApiAccessAndEnvironmentConfigService()
         );
 
-        $this->assertTrue($instance instanceof $instanceExpectedOf);
-
+        $this->assertTrue($instance instanceof $instanceExpectedOf, "Expected instance of '$instanceExpectedOf'");
     }
 }
