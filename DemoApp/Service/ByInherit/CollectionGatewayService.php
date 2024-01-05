@@ -20,7 +20,7 @@ final class CollectionGatewayService extends AbstractCollectionGateway implement
             new MtnAuthenticationProduct(
                 "0672b80420244d9f9d39330b0811e1cd",
                 "d57e01802dd3456fbfc6c2998dca2426",
-                "65a9c425-1d54-4a7b-b7d4-9c756f681920",
+                $this->accessRepository->getApiUser(),
                 $this->accessRepository->getApiKey()
             ),
             $this->accessRepository->getMtnAccessToken()

@@ -61,7 +61,7 @@ final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironment
         return new MtnAuthenticationProduct(
             "ac4f92d8be3e4801bd346d7a986cff52",
             "a882e46cedd948b1abe31c513e4b822b",
-            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517",
+            $this->accessRepository->getApiUser(),
             $this->accessRepository->getApiKey()
         );
     }
