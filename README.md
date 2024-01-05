@@ -43,6 +43,18 @@ interface CollectionGatewayInterface
     public function getAccountBasicInfo(string $number): array;
 }
 ```
+```php
+class CollectRequestBody
+{
+    public function __construct(
+        public readonly int    $amount, // Le montant
+        public readonly string $number, // le numéro MoMo du client
+        public readonly string $reference, // la référence de la transaction. Il doit être en version 4 du UUID
+    )
+    {
+    }
+}
+```
 Description des méthodes de l'interface `CollectionGatewayInterface`
 - `collect(...)` Permet de demander un paiement à un client. La demande de paiement
 est en attente jusqu'à ce que la transaction soit autorisée ou refusée par le client 
@@ -59,6 +71,18 @@ interface DisbursementGatewayInterface
     public function balance() : array;
     public function isAccountIsActive(string $number) : bool;
     public function getAccountBasicInfo(string $number) : array;
+}
+```
+```php
+class DisburseRequestBody
+{
+    public function __construct(
+        public readonly int    $amount, // Le montant
+        public readonly string $number, // le numéro MoMo du bénéficiaire
+        public readonly string $reference, // la référence de la transaction. Il doit être en version 4 du UUID
+    )
+    {
+    }
 }
 ```
 Description des méthodes de l'interface `DisbursementGatewayInterface`
@@ -86,7 +110,7 @@ $collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(...);
 $disbursementGateway = ApiGatewayFactory::loadMtnDisbursementGateway(...);
 ```
 Les deux méthodes static de la factory attendent en paramètre une instance de l'interface `MtnApiAccessAndEnvironmentConfigInterface`.
-Cette interface permet de renseigner les données de la configuration pour communiquer avec le serveur de MoMo API en environnement de sandbox ou en production.
+Cette interface permet de renseigner les données de configuration pour communiquer avec le serveur de MoMo API en environnement sandbox ou en production.
 
 ```php
 interface MtnApiAccessAndEnvironmentConfigInterface
@@ -183,22 +207,20 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
 
     public function onApiUserCreated(string $apiUser): void
     {
-        // TODO something
+        // TODO something such as save $apiUser in database
     }
 
     public function onApiKeyCreated(string $apiKey): void
     {
-        // TODO something
+        // TODO something such as save $apiKey in database
     }
 
     public function onTokenCreated(MtnAccessToken $mtnAccessToken): void
     {
-        // TODO something
+        // TODO something such as save $mtnAccessToken in database
     }
 }
 ```
-
-
 
 ```php
 /** 
@@ -212,8 +234,8 @@ $number = "066304925";
 if ($collectionGateway->collect(new CollectRequestBody(150, $number, ""))) {
     echo "Collect or request to pay is failed"
 }
-
 ```
+
 
 ### Application de démonstration
 Pour voir un exemple beaucoup plus complet, consultez la démonstration dans le **projet** `MobileMoneyGateway > DemoApp`.
