@@ -4,33 +4,33 @@
 **Version :** 1.0.0
 
 **ekolotech/mobilemoney-gateway** est un composant qui fournit un ensemble de classes et méthodes permettant d'utiliser
-les API de transactions de paiement et de dépôts d'argent via le mobile money pour les opérateurs et les plateformes de paiement.
+les API des opérations de paiement et de dépôts d'argent via le mobile money pour les opérateurs et les plateformes de paiement.
 
 ***Opérateurs et plateforme pris en compte :***
 - MTN Mobile Money
 - Airtel Mobile Money
 - MyPVit
 
-### Exemple
-Ci-dessous la mise en place du composant dans votre projet
+### Comment installer ?
+Vous pouvez
 
 > Télécharger le composant sur [github ekolotech/mobilemoney-gateway](https://github.com/igorcyberdyne/MobileMoneyGateway)
 
-OU
+OU exécuter la commande ci-dessous dans la console
 
->   composer ekolotech/mobilemoney-gateway
+    composer require ekolotech/mobilemoney-gateway
 
 
 ### ---------------- CAS D'UTILISATION ----------------
 
 ### I - L'API MTN Mobile Money ([MoMo API](https://momoapi.mtn.com/api-documentation))
-A ce niveau le composant implémente deux (2) produits de l'API MoMo API; 
+A ce niveau le composant implémente deux (2) produits de MoMo API; 
 à savoir le produit [Collections](https://momoapi.mtn.com/product#product=collections) 
 et le produit [Disbursements](https://momoapi.mtn.com/product#product=disbursements).
 
 Pour effectuer les opérations sur ces deux produits, deux objets ayant la signature des interfaces
 `CollectionGatewayInterface` et `DisbursementGatewayInterface` vous permettent d'utiliser respectivement 
-les encaissements ou la collect d'argent et les décaissements ou les dépôts d'argent.
+les opérations encaissements ou collect d'argent et les opérations de décaissements ou dépôts d'argent.
 
 #### 1. `CollectionGatewayInterface`
 ```php
@@ -56,7 +56,9 @@ interface DisbursementGatewayInterface
 }
 ```
 
-Une factory du composant vous permet de créer ces objects, telque dans l'exemple ci-dessous.
+L'obtention de ces deux objets se fait à partir d'une factory `ApiGatewayFactory` du composant.
+
+**Exemple :**
 ```php
 /** 
  * @var CollectionGatewayInterface $collectionGateway 
