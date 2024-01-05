@@ -190,7 +190,7 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
 ```
 
 ### Application de démonstration
-Pour voir un exemple beaucoup plus complet, allez consulter la démonstration dans le `Projet > DemoApp`.
+Pour voir un exemple beaucoup plus complet, consultez la démonstration dans le **projet** `MobileMoneyGateway > DemoApp`.
 Vous pouvez également exécuter la démo directement depuis la racine du projet, avec la commande suivante.
 
     php DemoApp\DemoApp.php
