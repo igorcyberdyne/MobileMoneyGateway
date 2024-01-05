@@ -12,10 +12,13 @@ les API de transactions de paiement et de dépôts d'argent via le mobile money 
 - MyPVit
 
 ### Exemple
-Ci-dessous la mise en place du composant
+Ci-dessous la mise en place du composant dans votre projet
 
-> Télécharger le composant sur [github ekolotech/mobilemoney-gateway](https://github.com/igorcyberdyne/MobileMoneyGateway), 
-> soit utiliser `$ composer ekolotech/mobilemoney-gateway`
+> Télécharger le composant sur [github ekolotech/mobilemoney-gateway](https://github.com/igorcyberdyne/MobileMoneyGateway)
+
+OU
+
+>   composer ekolotech/mobilemoney-gateway
 
 
 ### ---------------- CAS D'UTILISATION ----------------
