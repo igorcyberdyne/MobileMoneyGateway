@@ -18,9 +18,9 @@ Ci-dessous la mise en place du composant
 > soit utiliser `$ composer ekolotech/mobilemoney-gateway`
 
 
-### CAS D'UTILISATION
+### ---------------- CAS D'UTILISATION ----------------
 
-#### I - L'API MTN Mobile Money ([MoMo API](https://momoapi.mtn.com/api-documentation))
+### I - L'API MTN Mobile Money ([MoMo API](https://momoapi.mtn.com/api-documentation))
 A ce niveau le composant implémente deux (2) produits de l'API MoMo API; 
 à savoir le produit [Collections](https://momoapi.mtn.com/product#product=collections) 
 et le produit [Disbursements](https://momoapi.mtn.com/product#product=disbursements).
@@ -129,9 +129,9 @@ class MtnAccessToken
 - `$expiresIn` Le temps d'expiration du token `access_token` exprimé en seconde. Ce temps est de `3600 secondes, soit 1 heure`
 - `$isExpired` Vous devez calculer en se basant de la date de création et du temps d'expiration pour définir si ce token `access_token` est expiré ou pas. 
 
-**N.B :** Il est indispensable de bien traiter le traiter `$isExpired` pour éviter que le composant le créé toutes les fois.
+**N.B :** Il est indispensable de bien traiter le paramètre `$isExpired` pour éviter que le composant le créé toutes les fois.
 
-#### Exemple d'implémentation:
+#### Exemple d'implémentation :
 
 ```php
 class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigInterface 
@@ -178,6 +178,8 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
 }
 ```
 
+
+
 ```php
     /** 
      * @var CollectionGatewayInterface $collectionGateway 
@@ -186,3 +188,9 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
         new CollectionGatewayServiceImpl()
     );
 ```
+
+### Application de démonstration
+Pour voir un exemple beaucoup plus complet, allez consulter la démonstration dans le `Projet > DemoApp`.
+Vous pouvez également exécuter la démo directement depuis la racine du projet, avec la commande suivante.
+
+    php DemoApp\DemoApp.php
