@@ -3,7 +3,7 @@
 namespace DemoApp\RepositoryImpl;
 
 use DateTime;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Exception;
 
 abstract class AbstractInMemoryMtnAccessRepository extends AbstractFileStoreRepository

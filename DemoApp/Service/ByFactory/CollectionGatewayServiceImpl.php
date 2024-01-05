@@ -3,10 +3,10 @@
 namespace DemoApp\Service\ByFactory;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
-use Ekolotech\MoMoGateway\Api\Model\Currency;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Model\Currency;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 
 final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigInterface
 {

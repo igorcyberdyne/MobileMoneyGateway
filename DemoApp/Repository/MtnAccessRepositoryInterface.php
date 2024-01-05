@@ -2,7 +2,7 @@
 
 namespace DemoApp\Repository;
 
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 
 interface MtnAccessRepositoryInterface
 {

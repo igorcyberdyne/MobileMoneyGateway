@@ -3,12 +3,12 @@
 namespace DemoApp\Service\ByInherit;
 
 use DemoApp\Repository\MtnAccessRepositoryInterface;
-use Ekolotech\MoMoGateway\Api\Model\Currency;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\AbstractDisbursementGateway;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAccessToken;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Model\Currency;
+use Ekolotech\MoMoGateway\MtnGateway\Disbursement\AbstractDisbursementGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 
 final class DisbursementGatewayService extends AbstractDisbursementGateway implements MtnApiAccessConfigListenerInterface, MtnApiEnvironmentConfigInterface
 {

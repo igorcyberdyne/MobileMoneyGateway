@@ -3,7 +3,7 @@
 namespace DemoApp\RepositoryImpl;
 
 use DemoApp\Config;
-use Ekolotech\MoMoGateway\Api\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Exception;
 
 abstract class AbstractFileStoreRepository

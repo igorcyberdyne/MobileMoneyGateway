@@ -3,9 +3,9 @@
 namespace DemoApp;
 
 use DemoApp\Service\TransactionService;
-use Ekolotech\MoMoGateway\Api\Exception\ApiGatewayException;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Collection\CollectionGatewayInterface;
-use Ekolotech\MoMoGateway\Api\MtnGateway\Disbursement\DisbursementGatewayInterface;
+use Ekolotech\MoMoGateway\Exception\ApiGatewayException;
+use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;
