@@ -1,6 +1,7 @@
 # ekolotech/mobilemoney-gateway
 
 **Auteur :** [@igorcyberdyne](https://github.com/igorcyberdyne), [@EKOLOTECH](https://ekolotech.fr)
+
 **Version :** 1.0.0
 
 **ekolotech/mobilemoney-gateway** est un composant qui fournit un ensemble de classes et méthodes permettant d'utiliser
@@ -14,7 +15,7 @@ les API des opérations de paiement et de dépôts d'argent via le mobile money 
 ### Comment installer ?
 Vous pouvez
 
-> Télécharger le composant sur [github ekolotech/mobilemoney-gateway](https://github.com/igorcyberdyne/MobileMoneyGateway)
+> Télécharger le composant sur [`github` ekolotech/mobilemoney-gateway](https://github.com/igorcyberdyne/MobileMoneyGateway.git)
 
 OU exécuter la commande ci-dessous dans la console
 
