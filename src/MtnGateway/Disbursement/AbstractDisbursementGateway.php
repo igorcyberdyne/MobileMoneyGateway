@@ -8,12 +8,12 @@ use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\DisbursementException;
 use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\AbstractMtnApiGateway;
-use Exception;
 use Throwable;
 
 abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway implements DisbursementGatewayInterface
@@ -79,6 +79,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @return bool
      * @throws DisbursementException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function disburse(DisburseRequestBody $disburseRequestBody): bool
@@ -130,6 +131,10 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
             throw DisbursementException::load(DisbursementException::DISBURSE_BAD_NUMBER);
         }
 
+        if (!AbstractTools::isUuid($disburseRequestBody->reference)) {
+            throw DisbursementException::load(DisbursementException::DISBURSE_BAD_REFERENCE_UUID);
+        }
+
         return [
             "amount" => $disburseRequestBody->amount,
             "currency" => $this->getCurrency(),
@@ -146,20 +151,28 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
     /**
      * @param string $reference
      * @return array
+     * @throws DisbursementException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      */
     public function disburseReference(string $reference): array
     {
+
+        if (!AbstractTools::isUuid($reference)) {
+            throw DisbursementException::load(DisbursementException::DISBURSE_BAD_REFERENCE_UUID);
+        }
+
         return $this->transactionReference($reference);
     }
 
     /**
      * @return array
-     * @throws MtnAccessKeyException
-     * @throws TokenCreationException
      * @throws BalanceException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function balance(): array
     {
@@ -170,6 +183,9 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @param string $number
      * @return bool
      * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function isAccountIsActive(string $number): bool
     {
@@ -181,6 +197,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @return array
      * @throws AccountHolderException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array

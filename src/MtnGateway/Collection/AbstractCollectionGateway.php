@@ -74,6 +74,10 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
             throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_NUMBER);
         }
 
+        if (!AbstractTools::isUuid($collectRequestBody->reference)) {
+            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID);
+        }
+
         return [
             "amount" => $collectRequestBody->amount,
             "currency" => $this->getCurrency(),
@@ -114,9 +118,14 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      * @throws RefreshAccessException
+     * @throws CollectionException
      */
     public function collectReference(string $reference): array
     {
+        if (!AbstractTools::isUuid($reference)) {
+            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID);
+        }
+
         return $this->transactionReference($reference);
     }
 

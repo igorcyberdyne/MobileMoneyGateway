@@ -74,6 +74,10 @@ final class ExceptionMessage extends AbstractArrayKeyValue
                 "value" => "Bad number given",
             ],
             [
+                "key" => CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID,
+                "value" => "Bad reference given. It's must be a Version 4 of UUID",
+            ],
+            [
                 "key" => DisbursementException::DISBURSE_NOT_PERFORM,
                 "value" => "Error when launching disbursement",
             ],
@@ -88,6 +92,10 @@ final class ExceptionMessage extends AbstractArrayKeyValue
             [
                 "key" => DisbursementException::DISBURSE_BAD_NUMBER,
                 "value" => "Bad number given",
+            ],
+            [
+                "key" => DisbursementException::DISBURSE_BAD_REFERENCE_UUID,
+                "value" => "Bad reference given. It's must be a Version 4 of UUID",
             ],
             [
                 "key" => MtnAuthenticationProductException::PRODUCT_MUST_BE_CONFIGURED,

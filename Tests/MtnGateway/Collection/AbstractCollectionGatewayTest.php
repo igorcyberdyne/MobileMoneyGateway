@@ -445,6 +445,31 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
+    public function test_collect_THEN_failed()
+    {
+        $this->createToken();
+
+        $collectRequest = new CollectRequestBody(
+            1,
+            "46733123452",
+            "bad-uuid",
+        );
+
+        $this->expectExceptionCode(CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID);
+        $this->assertTrue($this->collectionGateway->collect($collectRequest));
+
+        return $collectRequest->reference;
+    }
+
+    /**
+     * @return string
+     * @throws CollectionException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function test_collect_THEN_success()
     {
         $this->createToken();

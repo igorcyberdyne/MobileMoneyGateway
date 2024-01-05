@@ -411,6 +411,31 @@ class AbstractDisbursementGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
+    public function test_disburse_WITH_bad_reference_THEN_failed()
+    {
+        $this->createToken();
+
+        $disburseRequest = new DisburseRequestBody(
+            1,
+            "46733123452",
+            "bad-uuid",
+        );
+
+        $this->expectExceptionCode(DisbursementException::DISBURSE_BAD_REFERENCE_UUID);
+        $this->assertTrue($this->disbursementGateway->disburse($disburseRequest));
+
+        return $disburseRequest->reference;
+    }
+
+    /**
+     * @return string
+     * @throws DisbursementException
+     * @throws EnvironmentException
+     * @throws MtnAccessKeyException
+     * @throws MtnAuthenticationProductException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function test_disburse_THEN_success()
     {
         $this->createToken();
