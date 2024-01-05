@@ -243,3 +243,8 @@ Pour voir un exemple beaucoup plus complet, consultez la démonstration dans le 
 Vous pouvez également exécuter la démo directement depuis la racine du projet, avec la commande suivante.
 
     php DemoApp\DemoApp.php
+
+### Remarque
+L'exécution des tests ou de l'application démo peut échouer ou être bloqué pour cause de plusieurs requêtes simultannées.
+Généralement la récupération du solde de compte peut faire échouer les tests s'ils sont tous exécuter à la fois.
+Il serait préférable d'exécuter ce test ou cette méthode dans l'application démonstration de façon indépendante des autres.
