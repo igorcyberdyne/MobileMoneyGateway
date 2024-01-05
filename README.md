@@ -21,7 +21,7 @@ OU exécuter la commande ci-dessous dans la console
     composer require ekolotech/mobilemoney-gateway
 
 
-### ---------------- CAS D'UTILISATION ----------------
+### ------------------------------------------- CAS D'UTILISATION -------------------------------------------
 
 ### I - L'API MTN Mobile Money ([MoMo API](https://momoapi.mtn.com/api-documentation))
 A ce niveau le composant implémente deux (2) produits de MoMo API; 
@@ -43,6 +43,12 @@ interface CollectionGatewayInterface
     public function getAccountBasicInfo(string $number): array;
 }
 ```
+Description des méthodes de l'interface `CollectionGatewayInterface`
+- `collect(...)` Permet de demander un paiement à un client. La demande de paiement
+est en attente jusqu'à ce que la transaction soit autorisée ou refusée par le client 
+ou qu'elle soit interrompue par le système après un delais d'attente depassé.
+Il est indispensable de vérifier le statut de la demande de paiement avec la méthode suivante.
+- `collectReference(...)` Permet d'obtenir le statut d'une demande de paiement.
 
 #### 2. `DisbursementGatewayInterface`
 ```php
@@ -55,10 +61,19 @@ interface DisbursementGatewayInterface
     public function getAccountBasicInfo(string $number) : array;
 }
 ```
+Description des méthodes de l'interface `DisbursementGatewayInterface`
+- `disburse(...)` Permet de transferer un montant de votre compte propre vers un compte bénéficiaire.
+Il est indispensable de vérifier le statut du transfert avec la méthode suivante.
+- `disburseReference(...)` Permet d'obtenir le statut d'un transfert
+
+**Pour les deux interfaces :**
+- `isAccountIsActive(...)` Permet de vérifier si un titulaire de compte est enregistré et actif dans le système.
+- `getAccountBasicInfo(...)` Permet d'obtenir les informations personnelles du titulaire du compte, telque son nom et prénom.
+- `balance()` Permet d'obtenir le solde du compte de [Collection](https://momoapi.mtn.com/product#product=collections) ou de [Disbursements](https://momoapi.mtn.com/product#product=disbursements)
+
+#### 3. Comment créer des instances des interfaces `CollectionGatewayInterface` et `DisbursementGatewayInterface`?
 
 L'obtention de ces deux objets se fait à partir d'une factory `ApiGatewayFactory` du composant.
-
-**Exemple :**
 ```php
 /** 
  * @var CollectionGatewayInterface $collectionGateway 
@@ -83,14 +98,14 @@ interface MtnApiAccessAndEnvironmentConfigInterface
     public function getProviderCallbackUrl(): string; // Votre url de callback. Exemple : https://mon-application.com/callback
     public function getProviderCallbackHost(): string; // Votre host de callback. Exemple : mon-application.com
     
-    /** Methodes événementiel à écouter **/
-    public function onApiUserCreated(string $apiUser): void;
-    public function onApiKeyCreated(string $apiKey): void;
-    public function onTokenCreated(MtnAccessToken $mtnAccessToken): void;
+    /** Methodes événementiel à écouter. Il est indispensable d'enregistrer ces données dans une base **/
+    public function onApiUserCreated(string $apiUser): void; // Fournit le API User créé
+    public function onApiKeyCreated(string $apiKey): void; // Fournit le API key
+    public function onTokenCreated(MtnAccessToken $mtnAccessToken): void; // Fournit le token d'accès
     
     /** Methodes de configuration des données d'authentification MoMo API **/
-    public function getMtnAuthenticationProduct() : MtnAuthenticationProduct;
-    public function getMtnAccessToken(): ?MtnAccessToken;
+    public function getMtnAuthenticationProduct() : MtnAuthenticationProduct; // Renvoie les clés d'authentification au produit (Collection ou Disbursement)
+    public function getMtnAccessToken(): ?MtnAccessToken; // Renvoie le token d'accès
 }
 ```
 
@@ -186,12 +201,18 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
 
 
 ```php
-    /** 
-     * @var CollectionGatewayInterface $collectionGateway 
-     */
-    $collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
-        new CollectionGatewayServiceImpl()
-    );
+/** 
+ * @var CollectionGatewayInterface $collectionGateway 
+ */
+$collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
+    new CollectionGatewayServiceImpl()
+);
+
+$number = "066304925";
+if ($collectionGateway->collect(new CollectRequestBody(150, $number, ""))) {
+    echo "Collect or request to pay is failed"
+}
+
 ```
 
 ### Application de démonstration
