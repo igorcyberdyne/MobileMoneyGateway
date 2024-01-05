@@ -21,7 +21,7 @@ OU exécuter la commande ci-dessous dans la console
     composer require ekolotech/mobilemoney-gateway
 
 
-### ------------------------------------------- CAS D'UTILISATION -------------------------------------------
+### ---------------------------------------- CAS D'UTILISATION ---------------------------------------
 
 ### I - L'API MTN Mobile Money ([MoMo API](https://momoapi.mtn.com/api-documentation))
 A ce niveau le composant implémente deux (2) produits de MoMo API; 
