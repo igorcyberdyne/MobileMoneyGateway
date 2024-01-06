@@ -1,4 +1,4 @@
 /vendor/
-/DemoApp/Data/
+/DemoApp/RepositoryData/
 /.phpunit.result.cache
 /composer.lock

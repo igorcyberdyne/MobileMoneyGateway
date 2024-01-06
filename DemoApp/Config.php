@@ -7,14 +7,24 @@ use RuntimeException;
 
 abstract class Config
 {
-    public static function projectDir(): string
+    private static function externalProjectDir(): string
     {
-        return __DIR__;
+        return dirname(__DIR__) . '/../../..';
+    }
+
+    private static function isLibraryInVendorDir(): string
+    {
+        return file_exists(self::externalProjectDir() . '/vendor/autoload.php');
+    }
+
+    public static function relativeProjectDir(): string
+    {
+        return !self::isLibraryInVendorDir() ? __DIR__ : self::externalProjectDir();
     }
 
     public static function dataDir(): string
     {
-        $dir = self::projectDir() . "/Data";
+        $dir = self::relativeProjectDir() . (!self::isLibraryInVendorDir() ? "/RepositoryData" : "/MomoGatewayRepoData");
 
         self::createDir($dir);
 

@@ -11,7 +11,13 @@ use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertIsArray;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+
+$filename = dirname(__DIR__) . '/../../../vendor/autoload.php';
+if (!file_exists($filename)) {
+    $filename = dirname(__DIR__) . '/vendor/autoload.php';
+}
+
+require $filename;
 
 class DemoApp
 {
@@ -213,7 +219,6 @@ class DemoApp
     public function runApp(): void
     {
         $number = "066304920";
-
         $this->display("****************************** START COLLECT PROCESS ******************************");
         $this->makeCollectAndCheckingProcess($number, 1);
         $this->collectAccountHolderProcess($number);
