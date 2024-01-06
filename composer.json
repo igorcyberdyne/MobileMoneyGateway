@@ -34,7 +34,7 @@
   "autoload": {
     "psr-4": {
       "Ekolotech\\MoMoGateway\\": "src/",
-      "Ekolotech\\MoMoGateway\\Tests": "Tests/",
+      "Ekolotech\\MoMoGateway\\Tests\\": "Tests/",
       "DemoApp\\": "DemoApp/"
     }
   },
