@@ -84,6 +84,7 @@ final class TransactionService
     /**
      * @param string $reference
      * @return array
+     * @throws CollectionException
      * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
@@ -135,7 +136,9 @@ final class TransactionService
     /**
      * @param string $reference
      * @return array
+     * @throws DisbursementException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      */
@@ -148,6 +151,7 @@ final class TransactionService
      * @return array
      * @throws BalanceException
      * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function disburseBalance(): array

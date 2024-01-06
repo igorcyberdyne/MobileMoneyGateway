@@ -3,13 +3,18 @@
 namespace DemoApp;
 
 use DemoApp\Service\TransactionService;
+use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\ApiGatewayException;
+use Ekolotech\MoMoGateway\Exception\BalanceException;
+use Ekolotech\MoMoGateway\Exception\CollectionException;
+use Ekolotech\MoMoGateway\Exception\DisbursementException;
+use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
+use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
+use Ekolotech\MoMoGateway\Exception\TokenCreationException;
+use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
-use function PHPUnit\Framework\assertArrayHasKey;
-use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertIsArray;
 
 
 $filename = dirname(__DIR__) . '/../../../vendor/autoload.php';
@@ -77,7 +82,11 @@ class DemoApp
      * @param string $number
      * @param int $amount
      * @return void
-     * @throws Exception
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws CollectionException
+     * @throws TransactionReferenceException
      */
     public function makeCollectAndCheckingProcess(string $number, int $amount): void
     {
@@ -86,37 +95,47 @@ class DemoApp
             $this->display("Collect reference created --> [[$collectReference]]");
 
             $collectCheckingData = $this->transactionService->checkCollect($collectReference);
-            assertIsArray($collectCheckingData);
-            assertArrayHasKey("status", $collectCheckingData);
-            assertEquals("SUCCESSFUL", $collectCheckingData["status"]);
-            $this->display("Reference checking --> [[$collectReference]]");
+            if (!key_exists("status", $collectCheckingData)) {
+                die("Key 'status' not exist");
+            }
 
+            if ($collectCheckingData["status"] != "SUCCESSFUL") {
+                die("In sandbox, the collect status must be 'SUCCESSFUL'");
+            }
+
+            $this->display("Reference checking --> [[$collectReference]]");
         }, __METHOD__);
     }
 
 
     /**
      * @return void
-     * @throws Exception
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws BalanceException
      */
     public function makeCollectBalanceProcess(): void
     {
         $this->execute(function () {
             $balance = $this->transactionService->collectBalance();
-            assertIsArray($balance);
+
             $this->display("Collect balance --> [[{$balance['availableBalance']} {$balance['currency']}]]");
         }, __METHOD__);
     }
 
     /**
      * @return void
-     * @throws Exception
+     * @throws BalanceException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function makeDisburseBalanceProcess(): void
     {
         $this->execute(function () {
             $balance = $this->transactionService->disburseBalance();
-            assertIsArray($balance);
+
             $this->display("Disburse balance --> [[{$balance['availableBalance']} {$balance['currency']}]]");
         }, __METHOD__);
     }
@@ -125,7 +144,11 @@ class DemoApp
      * @param string $number
      * @param int $amount
      * @return void
-     * @throws Exception
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
+     * @throws DisbursementException
      */
     public function makeDisburseAndCheckingProcess(string $number, int $amount): void
     {
@@ -134,14 +157,30 @@ class DemoApp
             $this->display("Disburse reference created --> [[$disburseReference]]");
 
             $disburseCheckingData = $this->transactionService->checkDisburse($disburseReference);
-            assertIsArray($disburseCheckingData);
-            assertArrayHasKey("status", $disburseCheckingData);
-            assertEquals("SUCCESSFUL", $disburseCheckingData["status"]);
+
+            if (!key_exists("status", $disburseCheckingData)) {
+                die("Key 'status' not exist");
+            }
+
+            if ($disburseCheckingData["status"] != "SUCCESSFUL") {
+                die("In sandbox, the disburse status must be 'SUCCESSFUL'");
+            }
+
             $this->display("Reference checking --> [[$disburseReference]]");
 
         }, __METHOD__);
     }
 
+    /**
+     * @param string $number
+     * @param CollectionGatewayInterface|DisbursementGatewayInterface $gateway
+     * @param string $processName
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     private function accountHolderProcess(
         string                                                  $number,
         CollectionGatewayInterface|DisbursementGatewayInterface $gateway,
@@ -152,14 +191,22 @@ class DemoApp
             function () use ($gateway, $number) {
                 $basicInfo = $gateway->getAccountBasicInfo($number);
 
-                assertIsArray($basicInfo);
-
                 $this->display("Account basic info name --> [[{$basicInfo['name']}]]");
             },
             $processName
         );
     }
 
+    /**
+     * @param string $number
+     * @param CollectionGatewayInterface|DisbursementGatewayInterface $gateway
+     * @param string $processName
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     private function isAccountHolderActiveProcess(
         string                                                  $number,
         CollectionGatewayInterface|DisbursementGatewayInterface $gateway,
@@ -176,6 +223,14 @@ class DemoApp
         );
     }
 
+    /**
+     * @param string $number
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function collectAccountHolderProcess(string $number): void
     {
         $this->accountHolderProcess(
@@ -185,6 +240,14 @@ class DemoApp
         );
     }
 
+    /**
+     * @param string $number
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function collectIsAccountHolderActiveProcess(string $number): void
     {
         $this->isAccountHolderActiveProcess(
@@ -194,6 +257,14 @@ class DemoApp
         );
     }
 
+    /**
+     * @param string $number
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function disburseAccountHolderProcess(string $number): void
     {
         $this->accountHolderProcess(
@@ -203,6 +274,14 @@ class DemoApp
         );
     }
 
+    /**
+     * @param string $number
+     * @return void
+     * @throws AccountHolderException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     */
     public function disburseIsAccountHolderActiveProcess(string $number): void
     {
         $this->isAccountHolderActiveProcess(
@@ -214,7 +293,15 @@ class DemoApp
 
 
     /**
-     * @throws Exception
+     * @return void
+     * @throws AccountHolderException
+     * @throws BalanceException
+     * @throws CollectionException
+     * @throws DisbursementException
+     * @throws MtnAccessKeyException
+     * @throws RefreshAccessException
+     * @throws TokenCreationException
+     * @throws TransactionReferenceException
      */
     public function runApp(): void
     {
