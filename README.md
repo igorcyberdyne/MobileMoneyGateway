@@ -9,8 +9,6 @@ les API des opérations de paiement et de dépôts d'argent via le mobile money 
 
 ***Opérateurs et plateforme pris en compte :***
 - MTN Mobile Money
-- Airtel Mobile Money
-- MyPVit
 
 ### Comment installer ?
 Vous pouvez
