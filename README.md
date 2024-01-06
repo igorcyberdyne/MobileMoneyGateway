@@ -130,7 +130,7 @@ interface MtnApiAccessAndEnvironmentConfigInterface
 }
 ```
 - `getProviderCallbackUrl(...)` Cette url est indispensable pour l'environnement de production, 
-car le serveur MoMo API envera à ce end-point les données contenant le statut de la transaction de paiement.
+car le serveur MoMo API enverra à ce end-point les données contenant le statut de la transaction de paiement.
 La requête envoyé à ce end-point sera en `POST`.
 
 **Description des paramètres du constructeur de la classe `MtnAuthenticationProduct(...)`**
@@ -223,17 +223,33 @@ class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigIn
 ```
 
 ```php
-/** 
- * @var CollectionGatewayInterface $collectionGateway 
- */
+/** @var CollectionGatewayInterface $collectionGateway */
 $collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
     new CollectionGatewayServiceImpl()
 );
 
-$number = "066304925";
-if ($collectionGateway->collect(new CollectRequestBody(150, $number, "a103dbea-d5f7-45f3-b2e5-e495904d44cb"))) {
-    echo "Collect or request to pay is failed"
+$clientNumber = "066304925";
+$collectReference = "a103dbea-d5f7-45f3-b2e5-e495904d44cb";
+
+// Vérification si le numéro est enregistré et possède un compte mobile money
+if (!$collectionGateway->isAccountIsActive($clientNumber)) {
+    die("Le titulaire du compte n'a pas de compte MoMo enregistré");
 }
+
+// Données personnelles du client. Peut être utilisé pour confirmer le nom et prénom du client
+$personalData = $collectionGateway->getAccountBasicInfo($clientNumber);
+
+// Demande de paiement au client. En production une notification sera envoyé au client pour valider le paiement.
+// Une fois le paiement valider par le client, le serveur MoMo API envoie le statut de la transaction sur votre end-point ou URL de callback
+if (!$collectionGateway->collect(new CollectRequestBody(150, $clientNumber, $reference))) {
+    die("Echec de la demande de paiement");
+}
+
+// Vérification du statut de la demande de paiement.
+$referenceData = $collectionGateway->collectReference($collectReference);
+
+// Solde du compte de paiement
+$balance = $collectionGateway->balance();
 ```
 
 
@@ -245,5 +261,5 @@ Vous pouvez également exécuter la démo directement depuis la racine du projet
 
 ### Remarque
 L'exécution des tests ou de l'application démo peut échouer ou être bloqué pour cause de plusieurs requêtes simultannées.
-Généralement le test sur récupération du solde de compte peut faire échouer les tests s'ils sont tous exécutés à la fois.
+Généralement le test sur la récupération du solde de compte peut faire échouer les tests s'ils sont tous exécutés à la fois.
 Il serait préférable d'exécuter le test ou la méthode en question dans l'application démonstration de façon indépendante des autres.
