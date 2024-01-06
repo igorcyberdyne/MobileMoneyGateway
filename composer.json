@@ -28,7 +28,7 @@
   ],
   "require": {
     "php": ">=8.0",
-    "symfony/http-client": "^6.4",
+    "symfony/http-client": "^5.4",
     "ramsey/uuid": "^4.7"
   },
   "autoload": {
