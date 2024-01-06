@@ -116,7 +116,7 @@ interface MtnApiAccessAndEnvironmentConfigInterface
     public function getBaseApiUrl(): string; // l'url de base de MTN MoMo API. Cette url varie selon l'environnement de sandbox ou de production
     public function isProd(): bool; // définition si le sandbox ou production. false pour le sandbox
     public function getCurrency(): string; // la devise de l'environnement, en €(EURO) pour le sandbox
-    public function getProviderCallbackUrl(): string; // Votre url de callback. Exemple : https://mon-application.com/callback
+    public function getProviderCallbackUrl(): string; // Votre end-point de callback. Exemple : https://mon-application.com/callback
     public function getProviderCallbackHost(): string; // Votre host de callback. Exemple : mon-application.com
     
     /** Methodes événementiel à écouter. Il est indispensable d'enregistrer ces données dans une base **/
@@ -129,6 +129,9 @@ interface MtnApiAccessAndEnvironmentConfigInterface
     public function getMtnAccessToken(): ?MtnAccessToken; // Renvoie le token d'accès
 }
 ```
+- `getProviderCallbackUrl(...)` Cette url est indispensable pour l'environnement de production, 
+car le serveur MoMo API envera à ce end-point les données contenant le statut de la transaction de paiement.
+La requête envoyé à ce end-point sera en `POST`.
 
 **Description des paramètres du constructeur de la classe `MtnAuthenticationProduct(...)`**
 ```php
