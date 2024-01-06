@@ -2,8 +2,6 @@
 
 **Auteur :** [@igorcyberdyne](https://github.com/igorcyberdyne), [@EKOLOTECH](https://ekolotech.fr)
 
-**Version :** 1.0.0
-
 **ekolotech/mobilemoney-gateway** est un composant qui fournit un ensemble de classes et méthodes permettant d'utiliser
 les API des opérations de paiement et de dépôts d'argent via le mobile money pour les opérateurs et les plateformes de paiement.
 
@@ -230,7 +228,7 @@ $collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
 );
 
 $number = "066304925";
-if ($collectionGateway->collect(new CollectRequestBody(150, $number, ""))) {
+if ($collectionGateway->collect(new CollectRequestBody(150, $number, "a103dbea-d5f7-45f3-b2e5-e495904d44cb"))) {
     echo "Collect or request to pay is failed"
 }
 ```
@@ -244,5 +242,5 @@ Vous pouvez également exécuter la démo directement depuis la racine du projet
 
 ### Remarque
 L'exécution des tests ou de l'application démo peut échouer ou être bloqué pour cause de plusieurs requêtes simultannées.
-Généralement la récupération du solde de compte peut faire échouer les tests s'ils sont tous exécuter à la fois.
-Il serait préférable d'exécuter ce test ou cette méthode dans l'application démonstration de façon indépendante des autres.
+Généralement le test sur récupération du solde de compte peut faire échouer les tests s'ils sont tous exécutés à la fois.
+Il serait préférable d'exécuter le test ou la méthode en question dans l'application démonstration de façon indépendante des autres.
