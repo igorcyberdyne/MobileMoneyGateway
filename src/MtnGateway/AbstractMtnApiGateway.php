@@ -332,7 +332,9 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
             return $mtnAccessToken;
         } catch (Throwable $t) {
-            $this->createAccess($t);
+            if ($mtnAccessToken = $this->createAccess($t)) {
+                return $mtnAccessToken;
+            }
 
             throw TokenCreationException::load(TokenCreationException::TOKEN_CREATION_ERROR, previous: $t);
         }
@@ -341,19 +343,19 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
     /**
      * Help method to create apiUser, apiKey and token
      * @param Throwable $originError
-     * @return void
+     * @return MtnAccessToken|null
      * @throws RefreshAccessException
      */
-    private function createAccess(Throwable $originError): void
+    private function createAccess(Throwable $originError): ?MtnAccessToken
     {
         if (self::STATUS_UNAUTHORIZED == $originError->getCode() && $this->isCreateAccessAlreadyUsed) {
-            return;
+            return null;
         }
 
         $this->isCreateAccessAlreadyUsed = true;
 
         if ($this instanceof MtnApiEnvironmentConfigInterface && $this->isProd()) {
-            return;
+            return null;
         }
 
         $oldApiUser = $this->authenticationProduct->getApiUser();
@@ -364,7 +366,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
             $this->authenticationProduct->setApiKey($this->createApiKey());
 
-            $this->createToken();
+            return $this->createToken();
         } catch (Throwable $t) {
             if ($t->getCode() === MtnAccessKeyException::CANNOT_PERFORM_REQUEST_TO_CREATE_API_USER) {
                 $this->authenticationProduct->setApiUser($oldApiUser);
