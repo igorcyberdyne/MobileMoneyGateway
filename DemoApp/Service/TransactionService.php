@@ -40,11 +40,16 @@ final class TransactionService
     public function __construct(bool $useFactory = true)
     {
         if ($useFactory) {
+            $collectionObject = new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository());
             $this->collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
-                new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository())
+                $collectionObject,
+                $collectionObject
             );
+
+            $disbursementObject = new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository());
             $this->disbursementGateway = ApiGatewayFactory::loadMtnDisbursementGateway(
-                new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository())
+                $disbursementObject,
+                $disbursementObject
             );
 
             return;

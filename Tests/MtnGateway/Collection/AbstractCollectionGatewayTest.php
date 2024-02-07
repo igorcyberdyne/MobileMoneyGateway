@@ -15,17 +15,24 @@ use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\AbstractCollectionGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
 
-class TestCollectionGateway extends AbstractCollectionGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
+class TestCollectionGateway extends AbstractCollectionGateway
+    implements
+    MtnApiEnvironmentConfigInterface,
+    MtnApiAccessConfigErrorListenerInterface,
+    MtnApiAccessConfigListenerInterface
 {
     public string $apiUserCreated = "";
+
     public function getBaseApiUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -59,13 +66,30 @@ class TestCollectionGateway extends AbstractCollectionGateway implements MtnApiE
 
     public function onApiKeyCreated(string $apiKey): void
     {
-        // TODO: Implement onApiUserCreated() method.
+
     }
 
     public function onTokenCreated(MtnAccessToken $mtnAccessToken): void
     {
         // TODO: Implement onApiUserCreated() method.
     }
+
+    public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+    public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+    public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+
 }
 
 
@@ -83,11 +107,7 @@ class AbstractCollectionGatewayTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        static::$authenticationProduct = new MtnAuthenticationProduct(
-            "0672b80420244d9f9d39330b0811e1cd",
-            "d57e01802dd3456fbfc6c2998dca2426",
-        );
+        static::$authenticationProduct = MtnAuthenticationProductConfig::collectionKeys();
     }
 
     /**
@@ -190,6 +210,8 @@ class AbstractCollectionGatewayTest extends TestCase
     }
 
     /**
+     * @param string|null $apiUser
+     * @param string|null $apiKey
      * @return $this
      * @throws EnvironmentException
      * @throws MtnAccessKeyException
@@ -197,20 +219,29 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function createToken(): static
+    public function createToken(
+        ?string $apiUser = null,
+        ?string $apiKey = null,
+    ): static
     {
-        $apiKey = $this->givenApiKey();
+        $apiKey = $apiKey ?? $this->givenApiKey();
+        if (empty($apiUser)) {
+            if (empty($this->apiUser)) {
+                $this->givenApiUser();
+            }
+
+            $apiUser = $this->apiUser;
+        }
 
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->apiUser,
+            apiUser: $apiUser,
             apiKey: $apiKey
         );
 
         $mtnAccessToken = $this
             ->givenCollectGateway($auth)
             ->collectionGateway
-            ->createToken()
-        ;
+            ->createToken();
 
         $this->assertNotEmpty($mtnAccessToken);
 
@@ -324,8 +355,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $mock = $this->getMockBuilder(TestCollectionGateway::class)
             ->setConstructorArgs([$auth])
             ->onlyMethods([$methodName])
-            ->getMock()
-        ;
+            ->getMock();
         $mock->expects(self::exactly(1))->method($methodName);
 
         if ($methodName !== "onTokenCreated") {
@@ -352,8 +382,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $auth = $this
             ->givenCollectGateway($auth)
             ->collectionGateway
-            ->getAuthenticationProduct()
-        ;
+            ->getAuthenticationProduct();
 
         $this->assertNotEmpty($auth->getApiUser());
         $this->assertEquals($auth->getApiUser(), $this->collectionGateway->apiUserCreated);
@@ -409,18 +438,9 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function test_create_token_THEN_failed()
+    public function test_create_token_THEN_created()
     {
-        $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->generateApiUser(),
-            apiKey: "apiKey"
-        );
-
-        $this->expectException(TokenCreationException::class);
-        $this
-            ->givenCollectGateway($auth)
-            ->collectionGateway
-            ->createToken();
+        $this->createToken();
     }
 
     /**
@@ -431,9 +451,12 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function test_create_token_THEN_created()
+    public function test_create_token_WITH_bad_apiKey_or_apiUser_THEN_apiKey_or_apiUser_generated_and_token_create()
     {
-        $this->createToken();
+        $this->createToken(
+            "bad-api-user",
+            "bad-api-key",
+        );
     }
 
     /**
@@ -626,8 +649,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $accountInfo = $this
             ->createToken()
             ->collectionGateway
-            ->getAccountBasicInfo("46733123452")
-        ;
+            ->getAccountBasicInfo("46733123452");
 
         $this->assertIsArray($accountInfo);
         foreach ([

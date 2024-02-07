@@ -14,6 +14,8 @@ use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\AbstractMtnApiGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiCollectionErrorListenerInterface;
+use Exception;
 use Throwable;
 
 abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implements CollectionGatewayInterface
@@ -47,13 +49,19 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
             $client = HttpClient::create(["headers" => $headers, "body" => json_encode($collectBody)]);
             $response = $client->request(RequestMethod::POST, $this->getCollectionUrl() . "/v1_0/requesttopay");
 
-            if ($response->getStatusCode() != self::STATUS_ACCEPTED) {
-                $response->toArray();
-
-                return false;
+            if ($response->getStatusCode() == self::STATUS_ACCEPTED) {
+                return true;
             }
 
-            return true;
+            if ($this instanceof MtnApiCollectionErrorListenerInterface) {
+                try {
+                    $this->onCollectError($collectRequestBody->reference, $response->toArray(false));
+                } catch (Exception) {
+                    // TODO something
+                }
+            }
+
+            return false;
         } catch (Throwable $t) {
             throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $t);
         }

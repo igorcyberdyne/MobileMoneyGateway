@@ -310,7 +310,7 @@ class DemoApp
         $this->makeCollectAndCheckingProcess($number, 1);
         $this->collectAccountHolderProcess($number);
         $this->collectIsAccountHolderActiveProcess($number);
-        sleep(5);
+        sleep(10);
         $this->makeCollectBalanceProcess();
 
 
@@ -319,7 +319,7 @@ class DemoApp
         $this->makeDisburseAndCheckingProcess($number, 1);
         $this->disburseAccountHolderProcess($number);
         $this->disburseIsAccountHolderActiveProcess($number);
-        sleep(5);
+        sleep(10);
         $this->makeDisburseBalanceProcess();
     }
 }

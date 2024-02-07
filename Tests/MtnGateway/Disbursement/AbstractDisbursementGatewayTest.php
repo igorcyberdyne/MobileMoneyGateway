@@ -19,6 +19,7 @@ use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterfa
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -73,12 +74,7 @@ class AbstractDisbursementGatewayTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        static::$authenticationProduct = new MtnAuthenticationProduct(
-            "ac4f92d8be3e4801bd346d7a986cff52",
-            "a882e46cedd948b1abe31c513e4b822b",
-            "ea4d4ba0-e1ac-47d7-b0f1-ba672533f517"
-        );
+        static::$authenticationProduct = MtnAuthenticationProductConfig::disbursementKeys();
     }
 
     private function givenApiUser(): string

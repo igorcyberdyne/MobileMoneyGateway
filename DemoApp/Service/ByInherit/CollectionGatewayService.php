@@ -2,13 +2,13 @@
 
 namespace DemoApp\Service\ByInherit;
 
+use DemoApp\Config;
 use DemoApp\Repository\MtnAccessRepositoryInterface;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\AbstractCollectionGateway;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
-use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 
 final class CollectionGatewayService extends AbstractCollectionGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
 {
@@ -17,11 +17,9 @@ final class CollectionGatewayService extends AbstractCollectionGateway implement
     )
     {
         parent::__construct(
-            new MtnAuthenticationProduct(
-                "0672b80420244d9f9d39330b0811e1cd",
-                "d57e01802dd3456fbfc6c2998dca2426",
-                $this->accessRepository->getApiUser(),
-                $this->accessRepository->getApiKey()
+            Config::collectionKeys(
+                apiUser: $this->accessRepository->getApiUser(),
+                apiKey: $this->accessRepository->getApiKey()
             ),
             $this->accessRepository->getMtnAccessToken()
         );

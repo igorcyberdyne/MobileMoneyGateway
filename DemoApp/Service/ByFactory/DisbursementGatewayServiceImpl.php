@@ -2,13 +2,18 @@
 
 namespace DemoApp\Service\ByFactory;
 
+use DemoApp\Config;
 use DemoApp\Repository\MtnAccessRepositoryInterface;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigInterface
+final class DisbursementGatewayServiceImpl
+    implements
+    MtnApiAccessAndEnvironmentConfigInterface,
+    MtnApiAccessConfigErrorListenerInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
@@ -58,16 +63,32 @@ final class DisbursementGatewayServiceImpl implements MtnApiAccessAndEnvironment
 
     public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
     {
-        return new MtnAuthenticationProduct(
-            "ac4f92d8be3e4801bd346d7a986cff52",
-            "a882e46cedd948b1abe31c513e4b822b",
-            $this->accessRepository->getApiUser(),
-            $this->accessRepository->getApiKey()
+        return Config::disbursementKeys(
+            apiUser: $this->accessRepository->getApiUser(),
+            apiKey: $this->accessRepository->getApiKey()
         );
     }
 
     public function getMtnAccessToken(): ?MtnAccessToken
     {
         return $this->accessRepository->getMtnAccessToken();
+    }
+
+    public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        var_dump("onApiUserCreationError");
+        var_dump($data);
+    }
+
+    public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        var_dump("onApiKeyCreationError");
+        var_dump($data);
+    }
+
+    public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        var_dump("onTokenCreationError");
+        var_dump($data);
     }
 }
