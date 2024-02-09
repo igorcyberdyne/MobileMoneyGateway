@@ -131,7 +131,7 @@ class AbstractCollectionGatewayTest extends TestCase
      */
     public function assertLoggerContains(string $expected, string $type = "info"): void
     {
-        $loggerMessages = $this->collectionGateway->getLogger()->getLoggerMessages() ?? [];
+        $loggerMessages = $this->collectionGateway->getLogger()?->getLoggerMessages() ?? [];
         $this->assertNotEmpty($loggerMessages[$type]);
         $this->assertContains($expected, $loggerMessages[$type]);
     }

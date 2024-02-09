@@ -111,7 +111,7 @@ class AbstractDisbursementGatewayTest extends TestCase
      */
     public function assertLoggerContains(string $expected, string $type = "info"): void
     {
-        $loggerMessages = $this->disbursementGateway->getLogger()->getLoggerMessages()[$type] ?? [];
+        $loggerMessages = $this->disbursementGateway->getLogger()?->getLoggerMessages()[$type] ?? [];
         $this->assertNotEmpty($loggerMessages);
         $this->assertContains($expected, $loggerMessages);
     }

@@ -180,7 +180,7 @@ abstract class ApiGatewayFactory
                     $this->mtnApiCollectionErrorListener?->onCollectReferenceError($reference, $data);
                 }
 
-                public function getLogger(): LoggerInterface
+                public function getLogger(): ?LoggerInterface
                 {
                     return $this->apiGatewayLogger?->getLogger();
                 }
@@ -275,7 +275,7 @@ abstract class ApiGatewayFactory
                     $this->mtnApiDisbursementErrorListener?->onDisburseReferenceError($reference, $data);
                 }
 
-                public function getLogger(): LoggerInterface
+                public function getLogger(): ?LoggerInterface
                 {
                     return $this->apiGatewayLogger?->getLogger();
                 }

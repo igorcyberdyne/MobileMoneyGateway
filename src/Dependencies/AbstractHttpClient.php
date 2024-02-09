@@ -7,7 +7,7 @@ use Exception;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpClient\HttpClient as SymfonyHttpClient;
 
-final class AbstractHttpClient
+abstract class AbstractHttpClient
 {
     /**
      * @param array $defaultOptions Default request's options

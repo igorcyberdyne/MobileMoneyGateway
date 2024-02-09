@@ -21,7 +21,7 @@ class HttpClient implements HttpClientInterface
     {
         $options = array_merge($this->defaultOptions, $options);
 
-        $this->apiGatewayLogger?->getLogger()->info("[HttpRequest] --> " . json_encode([
+        $this->apiGatewayLogger?->getLogger()?->info("[HttpRequest] --> " . json_encode([
                 "method" => $method,
                 "url" => $url,
                 "body" => $options["body"] ?? [],

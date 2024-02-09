@@ -36,19 +36,19 @@ final class ProcessTracker
             return null;
         }
 
-        $this->apiGatewayLogger?->getLogger()->info("[mobilemoney-gateway process] START <<<<<<<<<<< [$processId]");
+        $this->apiGatewayLogger?->getLogger()?->info("[mobilemoney-gateway process] START <<<<<<<<<<< [$processId]");
 
         try {
             $this->callBackResponse = $callable($this->apiGatewayLogger);
 
         } catch (Throwable $t) {
-            $this->apiGatewayLogger?->getLogger()->critical("Uncaught PHP Exception " . get_class($t) . ' : "' . $t->getMessage());
-            $this->apiGatewayLogger?->getLogger()->critical($t->getTraceAsString());
+            $this->apiGatewayLogger?->getLogger()?->critical("Uncaught PHP Exception " . get_class($t) . ' : "' . $t->getMessage());
+            $this->apiGatewayLogger?->getLogger()?->critical($t->getTraceAsString());
 
             $throwable = $t;
         }
 
-        $this->apiGatewayLogger?->getLogger()->info("[mobilemoney-gateway process] END >>>>>>>>>>> [$processId]");
+        $this->apiGatewayLogger?->getLogger()?->info("[mobilemoney-gateway process] END >>>>>>>>>>> [$processId]");
 
         if (!empty($throwable)) {
             throw $throwable;

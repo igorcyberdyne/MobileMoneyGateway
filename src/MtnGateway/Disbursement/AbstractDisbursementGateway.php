@@ -14,7 +14,6 @@ use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\AbstractMtnApiGateway;
-use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiDisbursementErrorListenerInterface;
 use Exception;
 use Throwable;
 

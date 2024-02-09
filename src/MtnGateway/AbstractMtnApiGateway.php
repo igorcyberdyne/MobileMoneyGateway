@@ -17,10 +17,11 @@ use Ekolotech\MoMoGateway\Helper\ProcessTracker;
 use Ekolotech\MoMoGateway\Interface\ApiGatewayLoggerInterface;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\AbstractCollectionGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Collection\MtnApiCollectionErrorListenerInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Disbursement\MtnApiDisbursementErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
-use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiCollectionErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
@@ -470,9 +471,15 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             }
 
 
-            if ($this instanceof MtnApiCollectionErrorListenerInterface) {
+            if ($this instanceof MtnApiCollectionErrorListenerInterface || $this instanceof MtnApiDisbursementErrorListenerInterface) {
+
+                /**
+                 * @see MtnApiCollectionErrorListenerInterface::onCollectReferenceError
+                 * @see MtnApiDisbursementErrorListenerInterface::onDisburseReferenceError
+                 */
+                $listenerMethod = $this instanceof MtnApiCollectionErrorListenerInterface ? "onCollectReferenceError" : "onDisburseReferenceError";
                 try {
-                    $this->onCollectReferenceError($reference, $response->toArray(false));
+                    $this->$listenerMethod($reference, $response->toArray(false));
                 } catch (Exception) {
                     // TODO something
                 }

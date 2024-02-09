@@ -6,5 +6,5 @@ use Psr\Log\LoggerInterface;
 
 interface ApiGatewayLoggerInterface
 {
-    public function getLogger(): LoggerInterface;
+    public function getLogger(): ?LoggerInterface;
 }
