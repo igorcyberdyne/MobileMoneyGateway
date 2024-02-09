@@ -7,7 +7,6 @@ use Ekolotech\MoMoGateway\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\CollectionException;
-use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
@@ -23,7 +22,6 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @param CollectRequestBody $collectRequestBody
      * @return bool
      * @throws CollectionException
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws RefreshAccessException
      */

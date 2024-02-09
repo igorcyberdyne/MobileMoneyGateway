@@ -7,7 +7,6 @@ use Ekolotech\MoMoGateway\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\DisbursementException;
-use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
@@ -79,7 +78,6 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @param DisburseRequestBody $disburseRequestBody
      * @return bool
      * @throws DisbursementException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -167,7 +165,6 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      * @param string $reference
      * @return array
      * @throws DisbursementException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
