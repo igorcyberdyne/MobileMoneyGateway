@@ -26,7 +26,6 @@ interface CollectionGatewayInterface
     /**
      * @param string $reference
      * @return array
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      * @throws RefreshAccessException
@@ -35,10 +34,9 @@ interface CollectionGatewayInterface
     public function collectReference(string $reference): array;
 
     /**
-     * @throws TokenCreationException
      * @throws BalanceException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function balance(): array;
 
@@ -46,7 +44,6 @@ interface CollectionGatewayInterface
      * @param string $number
      * @return bool
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -56,7 +53,6 @@ interface CollectionGatewayInterface
      * @param string $number
      * @return array
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */

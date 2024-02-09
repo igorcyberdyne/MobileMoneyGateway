@@ -72,7 +72,7 @@ abstract class Config
         ?string $apiKey = null
     ): MtnAuthenticationProduct
     {
-        return MtnAuthenticationProductConfig::collectionKeys(
+        return MtnAuthenticationProductConfig::disbursementKeys(
             $subscriptionKeyOne,
             $subscriptionKeyTwo,
             $apiUser,

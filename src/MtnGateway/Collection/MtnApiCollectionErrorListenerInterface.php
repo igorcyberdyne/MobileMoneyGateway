@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekolotech\MoMoGateway\MtnGateway\Interface;
+namespace Ekolotech\MoMoGateway\MtnGateway\Collection;
 
 interface MtnApiCollectionErrorListenerInterface
 {

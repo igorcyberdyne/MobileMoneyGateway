@@ -3,18 +3,21 @@
 namespace Ekolotech\MoMoGateway\Factory;
 
 use Ekolotech\MoMoGateway\Exception\FactoryException;
+use Ekolotech\MoMoGateway\Interface\ApiGatewayLoggerInterface;
 use Ekolotech\MoMoGateway\Model\GatewayProductTypeEnum;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\AbstractCollectionGateway;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Collection\MtnApiCollectionErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\AbstractDisbursementGateway;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Disbursement\MtnApiDisbursementErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
-use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiCollectionErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Psr\Log\LoggerInterface;
 
 abstract class ApiGatewayFactory
 {
@@ -22,38 +25,47 @@ abstract class ApiGatewayFactory
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
      * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
      * @param MtnApiCollectionErrorListenerInterface|null $mtnApiCollectionErrorListener
+     * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
      * @return CollectionGatewayInterface
      * @throws FactoryException
      */
     public static function loadMtnCollectionGateway(
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener,
-        ?MtnApiCollectionErrorListenerInterface $mtnApiCollectionErrorListener = null,
-    ) : CollectionGatewayInterface
+        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiCollectionErrorListenerInterface   $mtnApiCollectionErrorListener = null,
+        ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
+    ): CollectionGatewayInterface
     {
         return self::loadMtnGateway(
             GatewayProductTypeEnum::MtnCollectionGateway,
             $accessAndEnvironmentConfig,
             $mtnApiAccessConfigErrorListener,
-            $mtnApiCollectionErrorListener
+            mtnApiCollectionErrorListener: $mtnApiCollectionErrorListener,
+            apiGatewayLogger: $apiGatewayLogger
         );
     }
 
     /**
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
      * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
+     * @param MtnApiDisbursementErrorListenerInterface|null $mtnApiDisbursementErrorListener
+     * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
      * @return DisbursementGatewayInterface
      * @throws FactoryException
      */
     public static function loadMtnDisbursementGateway(
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
-    ) : DisbursementGatewayInterface
+        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiDisbursementErrorListenerInterface $mtnApiDisbursementErrorListener = null,
+        ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
+    ): DisbursementGatewayInterface
     {
         return self::loadMtnGateway(
             GatewayProductTypeEnum::MtnDisbursementGateway,
             $accessAndEnvironmentConfig,
-            $mtnApiAccessConfigErrorListener
+            $mtnApiAccessConfigErrorListener,
+            mtnApiDisbursementErrorListener: $mtnApiDisbursementErrorListener,
+            apiGatewayLogger: $apiGatewayLogger
         );
     }
 
@@ -63,32 +75,38 @@ abstract class ApiGatewayFactory
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
      * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
      * @param MtnApiCollectionErrorListenerInterface|null $mtnApiCollectionErrorListener
+     * @param MtnApiDisbursementErrorListenerInterface|null $mtnApiDisbursementErrorListener
+     * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
      * @return CollectionGatewayInterface|DisbursementGatewayInterface
      * @throws FactoryException
      */
     private static function loadMtnGateway(
-        GatewayProductTypeEnum $gatewayProductTypeEnum,
+        GatewayProductTypeEnum                    $gatewayProductTypeEnum,
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener,
-        ?MtnApiCollectionErrorListenerInterface $mtnApiCollectionErrorListener = null,
-    ) : CollectionGatewayInterface|DisbursementGatewayInterface
+        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiCollectionErrorListenerInterface   $mtnApiCollectionErrorListener = null,
+        ?MtnApiDisbursementErrorListenerInterface $mtnApiDisbursementErrorListener = null,
+        ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
+    ): CollectionGatewayInterface|DisbursementGatewayInterface
     {
         return match ($gatewayProductTypeEnum) {
             GatewayProductTypeEnum::MtnCollectionGateway => new class (
                 $accessAndEnvironmentConfig,
                 $mtnApiAccessConfigErrorListener,
-                $mtnApiCollectionErrorListener
+                $mtnApiCollectionErrorListener,
+                $apiGatewayLogger,
             ) extends AbstractCollectionGateway
                 implements
                 MtnApiEnvironmentConfigInterface,
                 MtnApiAccessConfigListenerInterface,
                 MtnApiAccessConfigErrorListenerInterface,
-                MtnApiCollectionErrorListenerInterface
-            {
+                MtnApiCollectionErrorListenerInterface,
+                ApiGatewayLoggerInterface {
                 public function __construct(
                     private readonly MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
                     private readonly ?MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener,
-                    private readonly ?MtnApiCollectionErrorListenerInterface $mtnApiCollectionErrorListener,
+                    private readonly ?MtnApiCollectionErrorListenerInterface   $mtnApiCollectionErrorListener,
+                    private readonly ?ApiGatewayLoggerInterface                $apiGatewayLogger,
                 )
                 {
                     parent::__construct(
@@ -139,17 +157,17 @@ abstract class ApiGatewayFactory
 
                 public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onApiUserCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onApiUserCreationError($mtnAuthenticationProduct, $data);
                 }
 
                 public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onApiKeyCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onApiKeyCreationError($mtnAuthenticationProduct, $data);
                 }
 
                 public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onTokenCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onTokenCreationError($mtnAuthenticationProduct, $data);
                 }
 
                 public function onCollectError(string $reference, array $data): void
@@ -162,19 +180,28 @@ abstract class ApiGatewayFactory
                     $this->mtnApiCollectionErrorListener?->onCollectReferenceError($reference, $data);
                 }
 
+                public function getLogger(): LoggerInterface
+                {
+                    return $this->apiGatewayLogger?->getLogger();
+                }
             },
             GatewayProductTypeEnum::MtnDisbursementGateway => new class (
                 $accessAndEnvironmentConfig,
-                $mtnApiAccessConfigErrorListener
+                $mtnApiAccessConfigErrorListener,
+                $mtnApiDisbursementErrorListener,
+                $apiGatewayLogger,
             ) extends AbstractDisbursementGateway
                 implements
                 MtnApiEnvironmentConfigInterface,
                 MtnApiAccessConfigListenerInterface,
-                MtnApiAccessConfigErrorListenerInterface
-            {
+                MtnApiAccessConfigErrorListenerInterface,
+                MtnApiDisbursementErrorListenerInterface,
+                ApiGatewayLoggerInterface {
                 public function __construct(
                     private readonly MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-                    private readonly ?MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
+                    private readonly ?MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener,
+                    private readonly ?MtnApiDisbursementErrorListenerInterface $mtnApiDisbursementErrorListener,
+                    private readonly ?ApiGatewayLoggerInterface                $apiGatewayLogger,
                 )
                 {
                     parent::__construct(
@@ -225,17 +252,32 @@ abstract class ApiGatewayFactory
 
                 public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onApiUserCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onApiUserCreationError($mtnAuthenticationProduct, $data);
                 }
 
                 public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onApiKeyCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onApiKeyCreationError($mtnAuthenticationProduct, $data);
                 }
 
                 public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
                 {
-                    $this->mtnApiAccessConfigErrorListener->onTokenCreationError($mtnAuthenticationProduct, $data);
+                    $this->mtnApiAccessConfigErrorListener?->onTokenCreationError($mtnAuthenticationProduct, $data);
+                }
+
+                public function onDisburseError(string $reference, array $data): void
+                {
+                    $this->mtnApiDisbursementErrorListener?->onDisburseError($reference, $data);
+                }
+
+                public function onDisburseReferenceError(string $reference, array $data): void
+                {
+                    $this->mtnApiDisbursementErrorListener?->onDisburseReferenceError($reference, $data);
+                }
+
+                public function getLogger(): LoggerInterface
+                {
+                    return $this->apiGatewayLogger?->getLogger();
                 }
             },
             default => throw FactoryException::load(FactoryException::CANNOT_CREATE_OBJECT_WITH_TYPE, ["type" => "[$gatewayProductTypeEnum->name]"]),

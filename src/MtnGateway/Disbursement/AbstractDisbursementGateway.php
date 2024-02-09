@@ -2,7 +2,7 @@
 
 namespace Ekolotech\MoMoGateway\MtnGateway\Disbursement;
 
-use Ekolotech\MoMoGateway\Dependencies\HttpClient;
+use Ekolotech\MoMoGateway\Dependencies\AbstractHttpClient;
 use Ekolotech\MoMoGateway\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
@@ -14,6 +14,8 @@ use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\AbstractMtnApiGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiDisbursementErrorListenerInterface;
+use Exception;
 use Throwable;
 
 abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway implements DisbursementGatewayInterface
@@ -84,35 +86,49 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      */
     public function disburse(DisburseRequestBody $disburseRequestBody): bool
     {
-        $disburseBody = $this->validateDisburseRequestBody($disburseRequestBody);
+        return $this->processTracker->start(function () use ($disburseRequestBody) {
+            $disburseBody = $this->validateDisburseRequestBody($disburseRequestBody);
 
-        $headers = [
-            'Authorization' => $this->buildBearerToken(),
-            'X-Callback-Url' => $this->getProviderCallbackUrl(),
-            'X-Reference-Id' => $disburseRequestBody->reference,
-            'X-Target-Environment' => $this->currentApiEnvName(),
-            'Content-Type' => 'application/json',
-            'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
-        ];
+            $headers = [
+                'Authorization' => $this->buildBearerToken(),
+                'X-Callback-Url' => $this->getProviderCallbackUrl(),
+                'X-Reference-Id' => $disburseRequestBody->reference,
+                'X-Target-Environment' => $this->currentApiEnvName(),
+                'Content-Type' => 'application/json',
+                'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
+            ];
 
-        if (!$this->isProd()) {
-            unset($headers["X-Callback-Url"]);
-        }
-
-        try {
-            $client = HttpClient::create(["headers" => $headers, "body" =>  json_encode($disburseBody)]);
-            $response = $client->request(RequestMethod::POST, $this->getDisbursementUrl() . "/v1_0/transfer");
-
-            if ($response->getStatusCode() != self::STATUS_ACCEPTED) {
-                $response->toArray();
-
-                return false;
+            if (!$this->isProd()) {
+                unset($headers["X-Callback-Url"]);
             }
 
-            return true;
-        } catch (Throwable $t) {
-            throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $t);
-        }
+            try {
+                $response = AbstractHttpClient::create(
+                    [
+                        "headers" => $headers,
+                        "body" => json_encode($disburseBody)
+                    ],
+                    apiGatewayLogger: $this->processTracker->getApiGatewayLogger()
+                )
+                    ->request(RequestMethod::POST, $this->getDisbursementUrl() . "/v1_0/transfer");
+
+                if ($response->getStatusCode() == self::STATUS_ACCEPTED) {
+                    return true;
+                }
+
+                if ($this instanceof MtnApiDisbursementErrorListenerInterface) {
+                    try {
+                        $this->onDisburseError($disburseRequestBody->reference, $response->toArray(false));
+                    } catch (Exception) {
+                        // TODO something
+                    }
+                }
+
+                return false;
+            } catch (Throwable $t) {
+                throw DisbursementException::load(DisbursementException::DISBURSE_NOT_PERFORM, previous: $t);
+            }
+        }, "disburse");
     }
 
 
@@ -159,49 +175,53 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
      */
     public function disburseReference(string $reference): array
     {
+        return $this->processTracker->start(function () use ($reference) {
+            if (!AbstractTools::isUuid($reference)) {
+                throw DisbursementException::load(DisbursementException::DISBURSE_BAD_REFERENCE_UUID);
+            }
 
-        if (!AbstractTools::isUuid($reference)) {
-            throw DisbursementException::load(DisbursementException::DISBURSE_BAD_REFERENCE_UUID);
-        }
-
-        return $this->transactionReference($reference);
+            return $this->transactionReference($reference);
+        }, "disburse reference");
     }
 
     /**
      * @return array
      * @throws BalanceException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function balance(): array
     {
-        return $this->accountBalance();
+        return $this->processTracker->start(function () {
+            return $this->accountBalance();
+        }, "disburse balance");
     }
 
     /**
      * @param string $number
      * @return bool
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function isAccountIsActive(string $number): bool
     {
-        return $this->accountHolderActive($number);
+        return $this->processTracker->start(function () use ($number) {
+            return $this->accountHolderActive($number);
+        }, "disburse is account is active");
     }
 
     /**
      * @param string $number
      * @return array
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array
     {
-        return $this->accountHolderBasicUserInfo($number);
+        return $this->processTracker->start(function () use ($number) {
+            return $this->accountHolderBasicUserInfo($number);
+        }, "disburse account holder basic info");
     }
 }

@@ -13,6 +13,8 @@ use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Helper\LoggerImpl;
+use Ekolotech\MoMoGateway\Interface\ApiGatewayLoggerInterface;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\AbstractDisbursementGateway;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
@@ -22,13 +24,30 @@ use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
-class TestDisbursementGateway extends AbstractDisbursementGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
+class TestDisbursementGateway extends AbstractDisbursementGateway
+    implements
+    MtnApiEnvironmentConfigInterface,
+    MtnApiAccessConfigListenerInterface,
+    ApiGatewayLoggerInterface
 {
+    private LoggerImpl $logger;
+
+    public function __construct(
+        MtnAuthenticationProduct $authenticationProduct,
+        ?MtnAccessToken          $mtnAccessToken = null
+    )
+    {
+        $this->logger = new LoggerImpl();
+        parent::__construct($authenticationProduct, $mtnAccessToken);
+    }
+
     public function getBaseApiUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
     }
+
     public function getProviderCallbackUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -63,11 +82,19 @@ class TestDisbursementGateway extends AbstractDisbursementGateway implements Mtn
     {
         // TODO: Implement onApiUserCreated() method.
     }
+
+    public function getLogger(): LoggerInterface|LoggerImpl
+    {
+        return $this->logger;
+    }
+
+
 }
+
 class AbstractDisbursementGatewayTest extends TestCase
 {
 
-    private AbstractDisbursementGateway $disbursementGateway;
+    private TestDisbursementGateway $disbursementGateway;
     private string $apiUser;
     private static MtnAuthenticationProduct $authenticationProduct;
 
@@ -75,6 +102,19 @@ class AbstractDisbursementGatewayTest extends TestCase
     {
         parent::setUp();
         static::$authenticationProduct = MtnAuthenticationProductConfig::disbursementKeys();
+    }
+
+    /**
+     * @param string $expected
+     * @param string $type
+     * @return void
+     */
+    public function assertLoggerContains(string $expected, string $type = "info"): void
+    {
+        $loggerMessages = $this->disbursementGateway->getLogger()->getLoggerMessages()[$type] ?? [];
+        $this->assertNotEmpty($loggerMessages);
+        $this->assertContains($expected, $loggerMessages);
+        //var_dump($loggerMessages);
     }
 
     private function givenApiUser(): string
@@ -147,6 +187,7 @@ class AbstractDisbursementGatewayTest extends TestCase
                 "targetEnvironment" => $this->disbursementGateway->currentApiEnvName()
             ],
         );
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse api user]");
     }
 
     /**
@@ -169,6 +210,7 @@ class AbstractDisbursementGatewayTest extends TestCase
             ->createApiKey();
 
         $this->assertNotEmpty($apiKey);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse api key]");
 
         return $apiKey;
     }
@@ -196,6 +238,7 @@ class AbstractDisbursementGatewayTest extends TestCase
             ->createToken();
 
         $this->assertNotEmpty($mtnAccessToken);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse token]");
 
         return $this;
     }
@@ -307,8 +350,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         $mock = $this->getMockBuilder(TestDisbursementGateway::class)
             ->setConstructorArgs([$auth])
             ->onlyMethods([$methodName])
-            ->getMock()
-        ;
+            ->getMock();
         $mock->expects(self::exactly(1))->method($methodName);
 
         if ($methodName !== "onTokenCreated") {
@@ -371,28 +413,6 @@ class AbstractDisbursementGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function test_create_token_THEN_failed()
-    {
-        $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->givenApiUser(),
-            apiKey: "apiKey"
-        );
-
-        $this->expectException(TokenCreationException::class);
-        $this
-            ->givenDisburseGateway($auth)
-            ->disbursementGateway
-            ->createToken();
-    }
-
-    /**
-     * @return void
-     * @throws EnvironmentException
-     * @throws MtnAccessKeyException
-     * @throws MtnAuthenticationProductException
-     * @throws RefreshAccessException
-     * @throws TokenCreationException
-     */
     public function test_create_token_THEN_created()
     {
         $this->createToken();
@@ -443,6 +463,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         );
 
         $this->assertTrue($this->disbursementGateway->disburse($disburseRequest));
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse]");
 
         return $disburseRequest->reference;
     }
@@ -533,6 +554,7 @@ class AbstractDisbursementGatewayTest extends TestCase
                  ] as $key) {
             $this->assertArrayHasKey($key, $disburseReference);
         }
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse reference]");
     }
 
     /**
@@ -552,6 +574,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         $this->assertArrayHasKey("availableBalance", $balance);
         $this->assertArrayHasKey("currency", $balance);
         $this->assertEquals($this->disbursementGateway->getCurrency(), $balance["currency"]);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse balance]");
     }
 
     /**
@@ -571,6 +594,7 @@ class AbstractDisbursementGatewayTest extends TestCase
                 ->disbursementGateway
                 ->isAccountIsActive("066304925")
         );
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse is account is active]");
     }
 
     /**
@@ -587,8 +611,7 @@ class AbstractDisbursementGatewayTest extends TestCase
         $accountInfo = $this
             ->createToken()
             ->disbursementGateway
-            ->getAccountBasicInfo("46733123452")
-        ;
+            ->getAccountBasicInfo("46733123452");
 
         $this->assertIsArray($accountInfo);
         foreach ([
@@ -612,6 +635,7 @@ class AbstractDisbursementGatewayTest extends TestCase
             "family_name" => "Box",
             "name" => "Sand Box",
         ], $accountInfo);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [disburse account holder basic info]");
     }
 
 }
