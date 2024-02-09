@@ -23,7 +23,7 @@ abstract class ApiGatewayFactory
 {
     /**
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
-     * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
+     * @param MtnApiAccessConfigErrorListenerInterface|null $mtnApiAccessConfigErrorListener
      * @param MtnApiCollectionErrorListenerInterface|null $mtnApiCollectionErrorListener
      * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
      * @return CollectionGatewayInterface
@@ -31,7 +31,7 @@ abstract class ApiGatewayFactory
      */
     public static function loadMtnCollectionGateway(
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener = null,
         ?MtnApiCollectionErrorListenerInterface   $mtnApiCollectionErrorListener = null,
         ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
     ): CollectionGatewayInterface
@@ -47,7 +47,7 @@ abstract class ApiGatewayFactory
 
     /**
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
-     * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
+     * @param MtnApiAccessConfigErrorListenerInterface|null $mtnApiAccessConfigErrorListener
      * @param MtnApiDisbursementErrorListenerInterface|null $mtnApiDisbursementErrorListener
      * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
      * @return DisbursementGatewayInterface
@@ -55,7 +55,7 @@ abstract class ApiGatewayFactory
      */
     public static function loadMtnDisbursementGateway(
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener = null,
         ?MtnApiDisbursementErrorListenerInterface $mtnApiDisbursementErrorListener = null,
         ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
     ): DisbursementGatewayInterface
@@ -73,7 +73,7 @@ abstract class ApiGatewayFactory
     /**
      * @param GatewayProductTypeEnum $gatewayProductTypeEnum
      * @param MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig
-     * @param MtnApiAccessConfigErrorListenerInterface $mtnApiAccessConfigErrorListener
+     * @param MtnApiAccessConfigErrorListenerInterface|null $mtnApiAccessConfigErrorListener
      * @param MtnApiCollectionErrorListenerInterface|null $mtnApiCollectionErrorListener
      * @param MtnApiDisbursementErrorListenerInterface|null $mtnApiDisbursementErrorListener
      * @param ApiGatewayLoggerInterface|null $apiGatewayLogger
@@ -83,7 +83,7 @@ abstract class ApiGatewayFactory
     private static function loadMtnGateway(
         GatewayProductTypeEnum                    $gatewayProductTypeEnum,
         MtnApiAccessAndEnvironmentConfigInterface $accessAndEnvironmentConfig,
-        MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener,
+        ?MtnApiAccessConfigErrorListenerInterface  $mtnApiAccessConfigErrorListener = null,
         ?MtnApiCollectionErrorListenerInterface   $mtnApiCollectionErrorListener = null,
         ?MtnApiDisbursementErrorListenerInterface $mtnApiDisbursementErrorListener = null,
         ?ApiGatewayLoggerInterface                $apiGatewayLogger = null,
