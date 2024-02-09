@@ -76,19 +76,13 @@ final class CollectionGatewayServiceImpl
 
     public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
     {
-        var_dump("onApiUserCreationError");
-        var_dump($data);
     }
 
     public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
     {
-        var_dump("onApiKeyCreationError");
-        var_dump($data);
     }
 
     public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
     {
-        var_dump("onTokenCreationError");
-        var_dump($data);
     }
 }

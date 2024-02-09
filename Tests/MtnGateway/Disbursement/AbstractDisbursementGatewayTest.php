@@ -114,7 +114,6 @@ class AbstractDisbursementGatewayTest extends TestCase
         $loggerMessages = $this->disbursementGateway->getLogger()->getLoggerMessages()[$type] ?? [];
         $this->assertNotEmpty($loggerMessages);
         $this->assertContains($expected, $loggerMessages);
-        //var_dump($loggerMessages);
     }
 
     private function givenApiUser(): string
