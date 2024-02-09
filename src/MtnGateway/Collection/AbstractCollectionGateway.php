@@ -2,18 +2,18 @@
 
 namespace Ekolotech\MoMoGateway\MtnGateway\Collection;
 
-use Ekolotech\MoMoGateway\Dependencies\HttpClient;
+use Ekolotech\MoMoGateway\Dependencies\AbstractHttpClient;
 use Ekolotech\MoMoGateway\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\CollectionException;
-use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\Model\RequestMethod;
 use Ekolotech\MoMoGateway\MtnGateway\AbstractMtnApiGateway;
+use Exception;
 use Throwable;
 
 abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implements CollectionGatewayInterface
@@ -22,41 +22,54 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      * @param CollectRequestBody $collectRequestBody
      * @return bool
      * @throws CollectionException
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws RefreshAccessException
      */
     public function collect(CollectRequestBody $collectRequestBody): bool
     {
-        $collectBody = $this->validateCollectRequestBody($collectRequestBody);
+        return $this->processTracker->start(function () use ($collectRequestBody) {
+            $collectBody = $this->validateCollectRequestBody($collectRequestBody);
 
-        $headers = [
-            'Authorization' => $this->buildBearerToken(),
-            'X-Callback-Url' => $this->getProviderCallbackUrl(),
-            'X-Reference-Id' => $collectRequestBody->reference,
-            'X-Target-Environment' => $this->currentApiEnvName(),
-            'Content-Type' => 'application/json',
-            'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
-        ];
+            $headers = [
+                'Authorization' => $this->buildBearerToken(),
+                'X-Callback-Url' => $this->getProviderCallbackUrl(),
+                'X-Reference-Id' => $collectRequestBody->reference,
+                'X-Target-Environment' => $this->currentApiEnvName(),
+                'Content-Type' => 'application/json',
+                'Ocp-Apim-Subscription-Key' => $this->authenticationProduct->getSubscriptionKeyOne(),
+            ];
 
-        if (!$this->isProd()) {
-            unset($headers["X-Callback-Url"]);
-        }
-
-        try {
-            $client = HttpClient::create(["headers" => $headers, "body" => json_encode($collectBody)]);
-            $response = $client->request(RequestMethod::POST, $this->getCollectionUrl() . "/v1_0/requesttopay");
-
-            if ($response->getStatusCode() != self::STATUS_ACCEPTED) {
-                $response->toArray();
-
-                return false;
+            if (!$this->isProd()) {
+                unset($headers["X-Callback-Url"]);
             }
 
-            return true;
-        } catch (Throwable $t) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $t);
-        }
+            try {
+                $response = AbstractHttpClient::create(
+                    [
+                        "headers" => $headers,
+                        "body" => json_encode($collectBody)
+                    ],
+                    apiGatewayLogger: $this->processTracker->getApiGatewayLogger()
+                )
+                    ->request(RequestMethod::POST, $this->getCollectionUrl() . "/v1_0/requesttopay");
+
+                if ($response->getStatusCode() == self::STATUS_ACCEPTED) {
+                    return true;
+                }
+
+                if ($this instanceof MtnApiCollectionErrorListenerInterface) {
+                    try {
+                        $this->onCollectError($collectRequestBody->reference, $response->toArray(false));
+                    } catch (Exception) {
+                        // TODO something
+                    }
+                }
+
+                return false;
+            } catch (Throwable $t) {
+                throw CollectionException::load(CollectionException::REQUEST_TO_PAY_NOT_PERFORM, previous: $t);
+            }
+        }, "collect");
     }
 
     /**
@@ -114,7 +127,6 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
     /**
      * @param string $reference
      * @return array
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      * @throws RefreshAccessException
@@ -122,49 +134,54 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
      */
     public function collectReference(string $reference): array
     {
-        if (!AbstractTools::isUuid($reference)) {
-            throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID);
-        }
+        return $this->processTracker->start(function () use ($reference) {
+            if (!AbstractTools::isUuid($reference)) {
+                throw CollectionException::load(CollectionException::REQUEST_TO_PAY_BAD_REFERENCE_UUID);
+            }
 
-        return $this->transactionReference($reference);
+            return $this->transactionReference($reference);
+        }, "collect reference");
     }
 
 
     /**
      * @throws TokenCreationException
      * @throws BalanceException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      */
     public function balance(): array
     {
-        return $this->accountBalance();
+        return $this->processTracker->start(function () {
+            return $this->accountBalance();
+        }, "collect balance");
     }
 
     /**
      * @param string $number
      * @return bool
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function isAccountIsActive(string $number): bool
     {
-        return $this->accountHolderActive($number);
+        return $this->processTracker->start(function () use ($number) {
+            return $this->accountHolderActive($number);
+        }, "collect is account is active");
     }
 
     /**
      * @param string $number
      * @return array
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
     public function getAccountBasicInfo(string $number): array
     {
-        return $this->accountHolderBasicUserInfo($number);
+        return $this->processTracker->start(function () use ($number) {
+            return $this->accountHolderBasicUserInfo($number);
+        }, "collect account holder basic info");
     }
 
     protected function getTokenUrl(): string

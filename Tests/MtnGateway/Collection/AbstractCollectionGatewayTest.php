@@ -13,19 +13,42 @@ use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\Helper\AbstractTools;
+use Ekolotech\MoMoGateway\Helper\LoggerImpl;
+use Ekolotech\MoMoGateway\Interface\ApiGatewayLoggerInterface;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\AbstractCollectionGateway;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiEnvironmentConfigInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 
-class TestCollectionGateway extends AbstractCollectionGateway implements MtnApiEnvironmentConfigInterface, MtnApiAccessConfigListenerInterface
+class TestCollectionGateway extends AbstractCollectionGateway
+    implements
+    MtnApiEnvironmentConfigInterface,
+    MtnApiAccessConfigErrorListenerInterface,
+    MtnApiAccessConfigListenerInterface,
+    ApiGatewayLoggerInterface
 {
     public string $apiUserCreated = "";
+    private LoggerImpl $logger;
+
+    public function __construct(
+        MtnAuthenticationProduct $authenticationProduct,
+        ?MtnAccessToken          $mtnAccessToken = null
+    )
+    {
+        $this->logger = new LoggerImpl();
+
+        parent::__construct($authenticationProduct, $mtnAccessToken);
+    }
+
     public function getBaseApiUrl(): string
     {
         return "https://sandbox.momodeveloper.mtn.com";
@@ -59,13 +82,34 @@ class TestCollectionGateway extends AbstractCollectionGateway implements MtnApiE
 
     public function onApiKeyCreated(string $apiKey): void
     {
-        // TODO: Implement onApiUserCreated() method.
+
     }
 
     public function onTokenCreated(MtnAccessToken $mtnAccessToken): void
     {
         // TODO: Implement onApiUserCreated() method.
     }
+
+    public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+    public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+    public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+
+    }
+
+    public function getLogger(): LoggerInterface|LoggerImpl
+    {
+        return $this->logger;
+    }
+
 }
 
 
@@ -80,14 +124,22 @@ class AbstractCollectionGatewayTest extends TestCase
     private string $apiUser;
     private static MtnAuthenticationProduct $authenticationProduct;
 
+    /**
+     * @param string $expected
+     * @param string $type
+     * @return void
+     */
+    public function assertLoggerContains(string $expected, string $type = "info"): void
+    {
+        $loggerMessages = $this->collectionGateway->getLogger()?->getLoggerMessages() ?? [];
+        $this->assertNotEmpty($loggerMessages[$type]);
+        $this->assertContains($expected, $loggerMessages[$type]);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
-
-        static::$authenticationProduct = new MtnAuthenticationProduct(
-            "0672b80420244d9f9d39330b0811e1cd",
-            "d57e01802dd3456fbfc6c2998dca2426",
-        );
+        static::$authenticationProduct = MtnAuthenticationProductConfig::collectionKeys();
     }
 
     /**
@@ -163,6 +215,7 @@ class AbstractCollectionGatewayTest extends TestCase
                 "targetEnvironment" => $this->collectionGateway->currentApiEnvName()
             ],
         );
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect api user]");
     }
 
     /**
@@ -185,11 +238,14 @@ class AbstractCollectionGatewayTest extends TestCase
             ->createApiKey();
 
         $this->assertNotEmpty($apiKey);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect api key]");
 
         return $apiKey;
     }
 
     /**
+     * @param string|null $apiUser
+     * @param string|null $apiKey
      * @return $this
      * @throws EnvironmentException
      * @throws MtnAccessKeyException
@@ -197,22 +253,32 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function createToken(): static
+    public function createToken(
+        ?string $apiUser = null,
+        ?string $apiKey = null,
+    ): static
     {
-        $apiKey = $this->givenApiKey();
+        $apiKey = $apiKey ?? $this->givenApiKey();
+        if (empty($apiUser)) {
+            if (empty($this->apiUser)) {
+                $this->givenApiUser();
+            }
+
+            $apiUser = $this->apiUser;
+        }
 
         $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->apiUser,
+            apiUser: $apiUser,
             apiKey: $apiKey
         );
 
         $mtnAccessToken = $this
             ->givenCollectGateway($auth)
             ->collectionGateway
-            ->createToken()
-        ;
+            ->createToken();
 
         $this->assertNotEmpty($mtnAccessToken);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect token]");
 
         return $this;
     }
@@ -324,8 +390,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $mock = $this->getMockBuilder(TestCollectionGateway::class)
             ->setConstructorArgs([$auth])
             ->onlyMethods([$methodName])
-            ->getMock()
-        ;
+            ->getMock();
         $mock->expects(self::exactly(1))->method($methodName);
 
         if ($methodName !== "onTokenCreated") {
@@ -352,8 +417,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $auth = $this
             ->givenCollectGateway($auth)
             ->collectionGateway
-            ->getAuthenticationProduct()
-        ;
+            ->getAuthenticationProduct();
 
         $this->assertNotEmpty($auth->getApiUser());
         $this->assertEquals($auth->getApiUser(), $this->collectionGateway->apiUserCreated);
@@ -388,6 +452,7 @@ class AbstractCollectionGatewayTest extends TestCase
             ->givenCollectGateway($auth)
             ->collectionGateway
             ->createApiKey();
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect api key]");
     }
 
     /**
@@ -409,18 +474,9 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function test_create_token_THEN_failed()
+    public function test_create_token_THEN_created()
     {
-        $auth = $this->givenAuthenticationProduct(
-            apiUser: $this->generateApiUser(),
-            apiKey: "apiKey"
-        );
-
-        $this->expectException(TokenCreationException::class);
-        $this
-            ->givenCollectGateway($auth)
-            ->collectionGateway
-            ->createToken();
+        $this->createToken();
     }
 
     /**
@@ -431,9 +487,12 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
-    public function test_create_token_THEN_created()
+    public function test_create_token_WITH_bad_apiKey_or_apiUser_THEN_apiKey_or_apiUser_generated_and_token_create()
     {
-        $this->createToken();
+        $this->createToken(
+            "bad-api-user",
+            "bad-api-key",
+        );
     }
 
     /**
@@ -469,6 +528,7 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws MtnAuthenticationProductException
      * @throws RefreshAccessException
      * @throws TokenCreationException
+     * @throws Throwable
      */
     public function test_collect_THEN_success()
     {
@@ -481,6 +541,7 @@ class AbstractCollectionGatewayTest extends TestCase
         );
 
         $this->assertTrue($this->collectionGateway->collect($collectRequest));
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect]");
 
         return $collectRequest->reference;
     }
@@ -551,6 +612,7 @@ class AbstractCollectionGatewayTest extends TestCase
      * @throws MtnAccessKeyException
      * @throws MtnAuthenticationProductException
      * @throws RefreshAccessException
+     * @throws Throwable
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      */
@@ -572,6 +634,8 @@ class AbstractCollectionGatewayTest extends TestCase
                  ] as $key) {
             $this->assertArrayHasKey($key, $collectReference);
         }
+
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect reference]");
     }
 
     /**
@@ -591,6 +655,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $this->assertArrayHasKey("availableBalance", $balance);
         $this->assertArrayHasKey("currency", $balance);
         $this->assertEquals($this->collectionGateway->getCurrency(), $balance["currency"]);
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect balance]");
     }
 
     /**
@@ -610,6 +675,8 @@ class AbstractCollectionGatewayTest extends TestCase
                 ->collectionGateway
                 ->isAccountIsActive("066304925")
         );
+
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect is account is active]");
     }
 
     /**
@@ -626,8 +693,7 @@ class AbstractCollectionGatewayTest extends TestCase
         $accountInfo = $this
             ->createToken()
             ->collectionGateway
-            ->getAccountBasicInfo("46733123452")
-        ;
+            ->getAccountBasicInfo("46733123452");
 
         $this->assertIsArray($accountInfo);
         foreach ([
@@ -651,6 +717,8 @@ class AbstractCollectionGatewayTest extends TestCase
             "family_name" => "Box",
             "name" => "Sand Box",
         ], $accountInfo);
+
+        $this->assertLoggerContains("[mobilemoney-gateway process] START <<<<<<<<<<< [collect account holder basic info]");
     }
 
 }

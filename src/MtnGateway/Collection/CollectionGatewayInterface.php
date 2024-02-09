@@ -6,7 +6,6 @@ use Ekolotech\MoMoGateway\Dto\CollectRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\CollectionException;
-use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
@@ -17,7 +16,6 @@ interface CollectionGatewayInterface
      * @param CollectRequestBody $collectRequestBody
      * @return bool
      * @throws CollectionException
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws RefreshAccessException
      */
@@ -26,7 +24,6 @@ interface CollectionGatewayInterface
     /**
      * @param string $reference
      * @return array
-     * @throws MtnAccessKeyException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
      * @throws RefreshAccessException
@@ -35,10 +32,9 @@ interface CollectionGatewayInterface
     public function collectReference(string $reference): array;
 
     /**
-     * @throws TokenCreationException
      * @throws BalanceException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
+     * @throws TokenCreationException
      */
     public function balance(): array;
 
@@ -46,7 +42,6 @@ interface CollectionGatewayInterface
      * @param string $number
      * @return bool
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -56,7 +51,6 @@ interface CollectionGatewayInterface
      * @param string $number
      * @return array
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */

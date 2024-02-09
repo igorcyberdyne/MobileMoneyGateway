@@ -2,13 +2,18 @@
 
 namespace DemoApp\Service\ByFactory;
 
+use DemoApp\Config;
 use DemoApp\Repository\MtnAccessRepositoryInterface;
 use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
 
-final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentConfigInterface
+final class CollectionGatewayServiceImpl
+    implements
+    MtnApiAccessAndEnvironmentConfigInterface,
+    MtnApiAccessConfigErrorListenerInterface
 {
     public function __construct(
         private readonly MtnAccessRepositoryInterface $accessRepository
@@ -58,16 +63,26 @@ final class CollectionGatewayServiceImpl implements MtnApiAccessAndEnvironmentCo
 
     public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
     {
-        return new MtnAuthenticationProduct(
-            "0672b80420244d9f9d39330b0811e1cd",
-            "d57e01802dd3456fbfc6c2998dca2426",
-            $this->accessRepository->getApiUser(),
-            $this->accessRepository->getApiKey()
+        return Config::collectionKeys(
+            apiUser: $this->accessRepository->getApiUser(),
+            apiKey: $this->accessRepository->getApiKey()
         );
     }
 
     public function getMtnAccessToken(): ?MtnAccessToken
     {
         return $this->accessRepository->getMtnAccessToken();
+    }
+
+    public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+    }
+
+    public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+    }
+
+    public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
     }
 }

@@ -7,19 +7,20 @@ use Ekolotech\MoMoGateway\Model\Currency;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessAndEnvironmentConfigInterface;
+use Ekolotech\MoMoGateway\MtnGateway\Interface\MtnApiAccessConfigErrorListenerInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAccessToken;
 use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use PHPUnit\Framework\TestCase;
 
-class MtnApiAccessAndEnvironmentConfigService implements MtnApiAccessAndEnvironmentConfigInterface
+class MtnApiAccessAndEnvironmentConfigService
+    implements
+    MtnApiAccessAndEnvironmentConfigInterface,
+    MtnApiAccessConfigErrorListenerInterface
 {
     public function getMtnAuthenticationProduct(): MtnAuthenticationProduct
     {
-        return new MtnAuthenticationProduct(
-            "0672b80420244d9f9d39330b0811e1cd",
-            "d57e01802dd3456fbfc6c2998dca2426",
-            "65a9c425-1d54-4a7b-b7d4-9c756f681920"
-        );
+        return MtnAuthenticationProductConfig::collectionKeys();
     }
 
     public function getBaseApiUrl(): string
@@ -67,6 +68,21 @@ class MtnApiAccessAndEnvironmentConfigService implements MtnApiAccessAndEnvironm
     {
         // TODO: Implement onApiUserCreated() method.
     }
+
+    public function onApiUserCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        // TODO: Implement onApiUserCreationError() method.
+    }
+
+    public function onApiKeyCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        // TODO: Implement onApiKeyCreationError() method.
+    }
+
+    public function onTokenCreationError(MtnAuthenticationProduct $mtnAuthenticationProduct, array $data): void
+    {
+        // TODO: Implement onTokenCreationError() method.
+    }
 }
 class ApiGatewayFactoryTest extends TestCase
 {
@@ -95,8 +111,10 @@ class ApiGatewayFactoryTest extends TestCase
         string $instanceExpectedOf
     )
     {
+        $object = new MtnApiAccessAndEnvironmentConfigService();
         $instance = ApiGatewayFactory::$methodName(
-            new MtnApiAccessAndEnvironmentConfigService()
+            $object,
+            $object
         );
 
         $this->assertTrue($instance instanceof $instanceExpectedOf, "Expected instance of '$instanceExpectedOf'");

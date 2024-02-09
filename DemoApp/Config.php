@@ -2,6 +2,8 @@
 
 namespace DemoApp;
 
+use Ekolotech\MoMoGateway\MtnGateway\Model\MtnAuthenticationProduct;
+use Ekolotech\MoMoGateway\Tests\MtnGateway\MtnAuthenticationProductConfig;
 use Exception;
 use RuntimeException;
 
@@ -46,5 +48,35 @@ abstract class Config
         } catch (Exception $exception) {
             throw new RuntimeException("Error to load dir : " . $exception->getMessage(), $exception->getCode());
         }
+    }
+
+    public static function collectionKeys(
+        ?string $subscriptionKeyOne = null,
+        ?string $subscriptionKeyTwo = null,
+        ?string $apiUser = null,
+        ?string $apiKey = null
+    ): MtnAuthenticationProduct
+    {
+        return MtnAuthenticationProductConfig::collectionKeys(
+            $subscriptionKeyOne,
+            $subscriptionKeyTwo,
+            $apiUser,
+            $apiKey,
+        );
+    }
+
+    public static function disbursementKeys(
+        ?string $subscriptionKeyOne = null,
+        ?string $subscriptionKeyTwo = null,
+        ?string $apiUser = null,
+        ?string $apiKey = null
+    ): MtnAuthenticationProduct
+    {
+        return MtnAuthenticationProductConfig::disbursementKeys(
+            $subscriptionKeyOne,
+            $subscriptionKeyTwo,
+            $apiUser,
+            $apiKey,
+        );
     }
 }

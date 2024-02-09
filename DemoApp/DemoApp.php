@@ -14,7 +14,7 @@ use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
-use Exception;
+use Throwable;
 
 
 $filename = dirname(__DIR__) . '/../../../vendor/autoload.php';
@@ -87,6 +87,7 @@ class DemoApp
      * @throws TokenCreationException
      * @throws CollectionException
      * @throws TransactionReferenceException
+     * @throws Throwable
      */
     public function makeCollectAndCheckingProcess(string $number, int $amount): void
     {
@@ -302,6 +303,7 @@ class DemoApp
      * @throws RefreshAccessException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
+     * @throws Throwable
      */
     public function runApp(): void
     {
@@ -310,7 +312,7 @@ class DemoApp
         $this->makeCollectAndCheckingProcess($number, 1);
         $this->collectAccountHolderProcess($number);
         $this->collectIsAccountHolderActiveProcess($number);
-        sleep(5);
+        sleep(10);
         $this->makeCollectBalanceProcess();
 
 
@@ -319,7 +321,7 @@ class DemoApp
         $this->makeDisburseAndCheckingProcess($number, 1);
         $this->disburseAccountHolderProcess($number);
         $this->disburseIsAccountHolderActiveProcess($number);
-        sleep(5);
+        sleep(10);
         $this->makeDisburseBalanceProcess();
     }
 }
@@ -328,7 +330,7 @@ try {
     $demoApp = new DemoApp();
     $demoApp->runApp();
     exit(0);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $message = $e instanceof ApiGatewayException ? $e->getMessage() . "; " . $e->getMessageOrigin() : $e->getMessage();
 
     echo DemoApp::colorLog("[[APP ERROR]] Code -> {$e->getCode()}, Message -> $message, " . DemoApp::colorLog("", ""), "e");

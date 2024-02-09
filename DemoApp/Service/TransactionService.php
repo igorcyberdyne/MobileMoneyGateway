@@ -2,6 +2,7 @@
 
 namespace DemoApp\Service;
 
+use DemoApp\ApiGatewayLoggerImpl;
 use DemoApp\RepositoryImpl\InMemoryCollectionAccessRepository;
 use DemoApp\RepositoryImpl\InMemoryDisbursementAccessRepository;
 use DemoApp\Service\ByFactory\CollectionGatewayServiceImpl;
@@ -25,6 +26,7 @@ use Ekolotech\MoMoGateway\Helper\AbstractTools;
 use Ekolotech\MoMoGateway\MtnGateway\Collection\CollectionGatewayInterface;
 use Ekolotech\MoMoGateway\MtnGateway\Disbursement\DisbursementGatewayInterface;
 use Exception;
+use Throwable;
 
 final class TransactionService
 {
@@ -39,12 +41,20 @@ final class TransactionService
      */
     public function __construct(bool $useFactory = true)
     {
+        $ApiGatewayLoggerImpl = new ApiGatewayLoggerImpl();
         if ($useFactory) {
+            $collectionObject = new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository());
             $this->collectionGateway = ApiGatewayFactory::loadMtnCollectionGateway(
-                new CollectionGatewayServiceImpl(new InMemoryCollectionAccessRepository())
+                $collectionObject,
+                $collectionObject,
+                apiGatewayLogger: $ApiGatewayLoggerImpl,
             );
+
+            $disbursementObject = new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository());
             $this->disbursementGateway = ApiGatewayFactory::loadMtnDisbursementGateway(
-                new DisbursementGatewayServiceImpl(new InMemoryDisbursementAccessRepository())
+                $disbursementObject,
+                $disbursementObject,
+                apiGatewayLogger: $ApiGatewayLoggerImpl,
             );
 
             return;
@@ -62,7 +72,7 @@ final class TransactionService
      * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
-     * @throws Exception
+     * @throws Throwable
      */
     public function executeCollect(int $amount, string $number): string
     {

@@ -6,7 +6,6 @@ use Ekolotech\MoMoGateway\Dto\DisburseRequestBody;
 use Ekolotech\MoMoGateway\Exception\AccountHolderException;
 use Ekolotech\MoMoGateway\Exception\BalanceException;
 use Ekolotech\MoMoGateway\Exception\DisbursementException;
-use Ekolotech\MoMoGateway\Exception\MtnAccessKeyException;
 use Ekolotech\MoMoGateway\Exception\RefreshAccessException;
 use Ekolotech\MoMoGateway\Exception\TokenCreationException;
 use Ekolotech\MoMoGateway\Exception\TransactionReferenceException;
@@ -17,7 +16,6 @@ interface DisbursementGatewayInterface
      * @param DisburseRequestBody $disburseRequestBody
      * @return bool
      * @throws DisbursementException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -27,7 +25,6 @@ interface DisbursementGatewayInterface
      * @param string $reference
      * @return array
      * @throws DisbursementException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      * @throws TransactionReferenceException
@@ -37,7 +34,6 @@ interface DisbursementGatewayInterface
     /**
      * @return array
      * @throws BalanceException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -47,7 +43,6 @@ interface DisbursementGatewayInterface
      * @param string $number
      * @return bool
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
@@ -57,7 +52,6 @@ interface DisbursementGatewayInterface
      * @param string $number
      * @return array
      * @throws AccountHolderException
-     * @throws MtnAccessKeyException
      * @throws RefreshAccessException
      * @throws TokenCreationException
      */
