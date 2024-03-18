@@ -115,7 +115,13 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
 
                 if ($this instanceof MtnApiDisbursementErrorListenerInterface) {
                     try {
-                        $this->onDisburseError($disburseRequestBody->reference, $response->toArray(false));
+                        $error = $response->toArray(false);
+                        $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                            "envName" => $this->currentApiEnvName(),
+                            "reference" => $disburseRequestBody->reference,
+                            "onDisburseError" => $error,
+                        ]));
+                        $this->onDisburseError($disburseRequestBody->reference, $error);
                     } catch (Exception) {
                         // TODO something
                     }

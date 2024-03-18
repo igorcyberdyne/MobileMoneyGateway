@@ -201,7 +201,13 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $this->onApiUserCreationError($this->authenticationProduct, $response->toArray(false));
+                            $error = $response->toArray(false);
+                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                                "envName" => $this->currentApiEnvName(),
+                                "onApiUserCreationError" => $error,
+                                "authenticationProduct" => $this->authenticationProduct->toArray(),
+                            ]));
+                            $this->onApiUserCreationError($this->authenticationProduct, $error);
                         } catch (Exception) {
                             // TODO something
                         }
@@ -283,7 +289,13 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $this->onApiKeyCreationError($this->authenticationProduct, $response->toArray(false));
+                            $error = $response->toArray(false);
+                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                                "envName" => $this->currentApiEnvName(),
+                                "onApiKeyCreationError" => $error,
+                                "authenticationProduct" => $this->authenticationProduct->toArray(),
+                            ]));
+                            $this->onApiKeyCreationError($this->authenticationProduct, $error);
                         } catch (Exception) {
                             // TODO something
                         }
@@ -347,7 +359,13 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $this->onTokenCreationError($this->authenticationProduct, $response->toArray(false));
+                            $error = $response->toArray(false);
+                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                                "envName" => $this->currentApiEnvName(),
+                                "onTokenCreationError" => $error,
+                                "authenticationProduct" => $this->authenticationProduct->toArray(),
+                            ]));
+                            $this->onTokenCreationError($this->authenticationProduct, $error);
                         } catch (Exception) {
 
                         }
@@ -479,7 +497,13 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
                  */
                 $listenerMethod = $this instanceof MtnApiCollectionErrorListenerInterface ? "onCollectReferenceError" : "onDisburseReferenceError";
                 try {
-                    $this->$listenerMethod($reference, $response->toArray(false));
+                    $error = $response->toArray(false);
+                    $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                        "envName" => $this->currentApiEnvName(),
+                        "reference" => $reference,
+                        $listenerMethod => $error,
+                    ]));
+                    $this->$listenerMethod($reference, $error);
                 } catch (Exception) {
                     // TODO something
                 }

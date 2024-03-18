@@ -59,7 +59,13 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
 
                 if ($this instanceof MtnApiCollectionErrorListenerInterface) {
                     try {
-                        $this->onCollectError($collectRequestBody->reference, $response->toArray(false));
+                        $error = $response->toArray(false);
+                        $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                            "envName" => $this->currentApiEnvName(),
+                            "reference" => $collectRequestBody->reference,
+                            "onCollectError" => $error,
+                        ]));
+                        $this->onCollectError($collectRequestBody->reference, $error);
                     } catch (Exception) {
                         // TODO something
                     }
