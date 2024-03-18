@@ -71,4 +71,18 @@ class MtnAuthenticationProduct
     {
         return $this->subscriptionKeyTwo;
     }
+
+    public function toArray(): array
+    {
+        return [
+            "MtnAuthenticationProduct" => [
+                "apiUser" => $this->apiUser,
+            ]
+        ];
+    }
+
+    public function __toString(): string
+    {
+        return json_encode($this->toArray());
+    }
 }
