@@ -520,7 +520,7 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
             $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
                 "envName" => $this->currentApiEnvName(),
                 "reference" => $reference,
-                    $listenerMethod ?? "" => $error,
+                ($listenerMethod ?? "") => $error,
             ]));
 
             throw TransactionReferenceException::load(TransactionReferenceException::TRANSACTION_REFERENCE_CANNOT_BE_RETRIEVE);
