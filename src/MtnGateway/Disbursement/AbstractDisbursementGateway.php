@@ -113,19 +113,23 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
                     return true;
                 }
 
+                try {
+                    $error = $response->toArray(false);
+                } catch (Exception $e) {
+                    $error = ["message" => $e->getMessage()];
+                }
                 if ($this instanceof MtnApiDisbursementErrorListenerInterface) {
                     try {
-                        $error = $response->toArray(false);
-                        $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                            "envName" => $this->currentApiEnvName(),
-                            "reference" => $disburseRequestBody->reference,
-                            "onDisburseError" => $error,
-                        ]));
                         $this->onDisburseError($disburseRequestBody->reference, $error);
-                    } catch (Exception) {
-                        // TODO something
+                    } catch (Exception $e) {
+                        $error = [$error, ["message" => $e->getMessage()]];
                     }
                 }
+                $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                    "envName" => $this->currentApiEnvName(),
+                    "reference" => $disburseRequestBody->reference,
+                    "onDisburseError" => $error,
+                ]));
 
                 return false;
             } catch (Throwable $t) {
