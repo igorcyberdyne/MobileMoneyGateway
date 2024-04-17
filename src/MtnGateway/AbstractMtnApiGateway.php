@@ -199,19 +199,23 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
                 if (!in_array($response->getStatusCode(), [self::STATUS_CREATED, self::STATUS_CONFLICT])) {
 
+                    try {
+                        $error = $response->toArray(false);
+                    } catch (Exception $e) {
+                        $error = ["message" => $e->getMessage()];
+                    }
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $error = $response->toArray(false);
-                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                                "envName" => $this->currentApiEnvName(),
-                                "onApiUserCreationError" => $error,
-                                "authenticationProduct" => $this->authenticationProduct->toArray(),
-                            ]));
                             $this->onApiUserCreationError($this->authenticationProduct, $error);
-                        } catch (Exception) {
-                            // TODO something
+                        } catch (Exception $e) {
+                            $error = [$error, ["message" => $e->getMessage()]];
                         }
                     }
+                    $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                        "envName" => $this->currentApiEnvName(),
+                        "onApiUserCreationError" => $error,
+                        "authenticationProduct" => $this->authenticationProduct->toArray(),
+                    ]));
 
                     throw new Exception("Cannot create API User");
                 }
@@ -286,20 +290,23 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
                     ->request(RequestMethod::POST, $this->getCreateApiKeyUrl());
 
                 if ($response->getStatusCode() != self::STATUS_CREATED) {
-
+                    try {
+                        $error = $response->toArray(false);
+                    } catch (Exception $e) {
+                        $error = ["message" => $e->getMessage()];
+                    }
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $error = $response->toArray(false);
-                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                                "envName" => $this->currentApiEnvName(),
-                                "onApiKeyCreationError" => $error,
-                                "authenticationProduct" => $this->authenticationProduct->toArray(),
-                            ]));
                             $this->onApiKeyCreationError($this->authenticationProduct, $error);
-                        } catch (Exception) {
-                            // TODO something
+                        } catch (Exception $e) {
+                            $error = [$error, ["message" => $e->getMessage()]];
                         }
                     }
+                    $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                        "envName" => $this->currentApiEnvName(),
+                        "onApiKeyCreationError" => $error,
+                        "authenticationProduct" => $this->authenticationProduct->toArray(),
+                    ]));
 
                     throw new Exception("Cannot create API Key");
                 }
@@ -356,20 +363,23 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
 
 
                 if ($response->getStatusCode() != self::STATUS_SUCCESS) {
-
+                    try {
+                        $error = $response->toArray(false);
+                    } catch (Exception $e) {
+                        $error = ["message" => $e->getMessage()];
+                    }
                     if ($this instanceof MtnApiAccessConfigErrorListenerInterface) {
                         try {
-                            $error = $response->toArray(false);
-                            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                                "envName" => $this->currentApiEnvName(),
-                                "onTokenCreationError" => $error,
-                                "authenticationProduct" => $this->authenticationProduct->toArray(),
-                            ]));
                             $this->onTokenCreationError($this->authenticationProduct, $error);
-                        } catch (Exception) {
-
+                        } catch (Exception $e) {
+                            $error = [$error, ["message" => $e->getMessage()]];
                         }
                     }
+                    $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                        "envName" => $this->currentApiEnvName(),
+                        "onTokenCreationError" => $error,
+                        "authenticationProduct" => $this->authenticationProduct->toArray(),
+                    ]));
 
                     throw ProductTokenSessionException::load(ProductTokenSessionException::PRODUCT_TOKEN_SESSION_CANNOT_BE_CREATE);
                 }
@@ -488,6 +498,11 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
                 return $response->toArray();
             }
 
+            try {
+                $error = $response->toArray(false);
+            } catch (Exception $e) {
+                $error = ["message" => $e->getMessage()];
+            }
 
             if ($this instanceof MtnApiCollectionErrorListenerInterface || $this instanceof MtnApiDisbursementErrorListenerInterface) {
 
@@ -497,17 +512,16 @@ abstract class AbstractMtnApiGateway implements MtnApiAccessConfigInterface
                  */
                 $listenerMethod = $this instanceof MtnApiCollectionErrorListenerInterface ? "onCollectReferenceError" : "onDisburseReferenceError";
                 try {
-                    $error = $response->toArray(false);
-                    $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                        "envName" => $this->currentApiEnvName(),
-                        "reference" => $reference,
-                        $listenerMethod => $error,
-                    ]));
                     $this->$listenerMethod($reference, $error);
-                } catch (Exception) {
-                    // TODO something
+                } catch (Exception $e) {
+                    $error = [$error, ["message" => $e->getMessage()]];
                 }
             }
+            $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                "envName" => $this->currentApiEnvName(),
+                "reference" => $reference,
+                    $listenerMethod ?? "" => $error,
+            ]));
 
             throw TransactionReferenceException::load(TransactionReferenceException::TRANSACTION_REFERENCE_CANNOT_BE_RETRIEVE);
         } catch (Throwable $t) {

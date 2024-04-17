@@ -57,19 +57,24 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
                     return true;
                 }
 
+                try {
+                    $error = $response->toArray(false);
+                } catch (Exception $e) {
+                    $error = ["message" => $e->getMessage()];
+                }
                 if ($this instanceof MtnApiCollectionErrorListenerInterface) {
                     try {
-                        $error = $response->toArray(false);
-                        $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
-                            "envName" => $this->currentApiEnvName(),
-                            "reference" => $collectRequestBody->reference,
-                            "onCollectError" => $error,
-                        ]));
                         $this->onCollectError($collectRequestBody->reference, $error);
-                    } catch (Exception) {
-                        // TODO something
+                    } catch (Exception $e) {
+                        $error = [$error, ["message" => $e->getMessage()]];
                     }
                 }
+
+                $this->processTracker->getApiGatewayLogger()?->getLogger()?->emergency(json_encode([
+                    "envName" => $this->currentApiEnvName(),
+                    "reference" => $collectRequestBody->reference,
+                    "onCollectError" => $error,
+                ]));
 
                 return false;
             } catch (Throwable $t) {
