@@ -56,10 +56,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables(
-            "Décaissement d'un montant de [[amount]] {$this->getCurrency()} au bénéfice du numéro [[number]]",
-            $params
-        );
+        return AbstractTools::injectVariables("Décaissement de [[amount]] {$this->getCurrency()} vers le [[number]]", $params);
     }
 
 
@@ -70,7 +67,7 @@ abstract class AbstractDisbursementGateway extends AbstractMtnApiGateway impleme
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Le compte au numéro [[number]] a été crédité de [[amount]] {$this->getCurrency()}", $params);
+        return AbstractTools::injectVariables("Le [[number]] a été crédité de [[amount]] {$this->getCurrency()}", $params);
     }
 
 
