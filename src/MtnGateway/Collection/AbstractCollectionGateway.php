@@ -122,7 +122,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Le compte au numéro [[number]] a été débité d'un montant de [[amount]] {$this->getCurrency()}", $params);
+        return AbstractTools::injectVariables("Le [[number]] a été débité de [[amount]] {$this->getCurrency()}", $params);
     }
 
     protected function getPayeeNote(): string
@@ -132,7 +132,7 @@ abstract class AbstractCollectionGateway extends AbstractMtnApiGateway implement
         $params["number"] = $args["number"] ?? "";
         $params["amount"] = $args["amount"] ?? "";
 
-        return AbstractTools::injectVariables("Montant de [[amount]] {$this->getCurrency()} collecté sur le numéro [[number]]", $params);
+        return AbstractTools::injectVariables("[[amount]] {$this->getCurrency()} collecté sur le [[number]]", $params);
     }
 
     /**
